@@ -77,7 +77,7 @@
   .p-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; gap: 8px; flex-wrap: wrap; }
   .p-row:last-child { border-bottom: none; }
   .p-left { display: flex; align-items: flex-start; gap: 9px; min-width: 0; }
-  .comm-icons { display: flex; align-items: center; gap: 5px; }
+  .comm-icons { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; width: max-content; }
   .wing-line { margin-top: 2px; }
   .wing-link { border: 0; padding: 0; background: none; color: #2563EB; font: inherit; text-decoration: underline; cursor: pointer; }
   .wing-modal { gap: 10px; }
@@ -652,9 +652,11 @@
       var info = document.createElement("div");
       var badgeInit = u.id === f.initId ? " <span class='badge b-comp'>РП</span>" : "";
       info.innerHTML = "<b>" + u.name + "</b>" + badgeInit + "<div class='sub'>" + u.role + " · " + u.wing + "</div>";
+      var contacts = makeCommIcons(u);
+      contacts.style.marginTop = "6px";
+      info.appendChild(contacts);
       left.appendChild(info);
       row.appendChild(left);
-      row.appendChild(makeCommIcons(u));
       c3.appendChild(row);
     }
     box.appendChild(c3);
@@ -805,6 +807,9 @@
       left.appendChild(makeAvatar(u, true));
       var info = document.createElement("div");
       info.innerHTML = "<b>" + u.name + "</b><div class='sub'>" + u.role + (u.car ? " · 🚗 +" + u.seats : "") + "</div>";
+      var contacts = makeCommIcons(u);
+      contacts.style.marginTop = "6px";
+      info.appendChild(contacts);
       var pilotWings = getPilotWings(u);
       var wingLine = document.createElement("div");
       wingLine.className = "sub wing-line";
@@ -823,9 +828,6 @@
         wingLine.appendChild(document.createTextNode("не указано"));
       }
       info.appendChild(wingLine);
-      var contacts = makeCommIcons(u);
-      contacts.style.marginTop = "6px";
-      info.appendChild(contacts);
       left.appendChild(info);
       row.appendChild(left);
       box.appendChild(row);
