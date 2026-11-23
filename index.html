@@ -1056,9 +1056,17 @@
     var m = String(f.date || "").toLowerCase().match(/(\\d{1,2})\\s+([а-яё]+)/i);
     if (!m || months[m[2]] === undefined) return null;
     var ym = String(f.month || "").match(/(20\\d{2})/);
+    var year = ym ? Number(ym[1]) : new Date().getFullYear();
     var tm = String(f.time || "").match(/(\\d{1,2}):(\\d{2})/);
-    var d = new Date(ym ? Number(ym[1]) : new Date().getFullYear(), months[m[2]], Number(m[1]), tm ? Number(tm[1]) : 12, tm ? Number(tm[2]) : 0);
-    return isNaN(d.getTime()) ? null : d;
+    var hour = tm ? Number(tm[1]) : 12;
+    var minute = tm ? Number(tm[2]) : 0;
+    var month = months[m[2]] + 1;
+    var day = Number(m[1]);
+    return {
+      key: year + "-" + String(month).padStart(2,"0") + "-" + String(day).padStart(2,"0") +
+        "T" + String(hour).padStart(2,"0") + ":" + String(minute).padStart(2,"0"),
+      timestamp: Date.UTC(year, month - 1, day, hour, minute)
+    };
   }
 
   function updateFeaturedFlightWeather() {
@@ -1088,11 +1096,17 @@
     } else {
       var hourly = data.hourly, best = -1, bestDiff = Infinity;
       for (var i = 0; i < (hourly.time || []).length; i++) {
-        var diff = Math.abs(new Date(hourly.time[i] + ":00").getTime() - target.getTime());
+        // Open-Meteo отдаёт время в часовом поясе спота без UTC-смещения.
+        // Сравниваем календарные компоненты напрямую, не используя часовой пояс телефона.
+        var forecastTime = String(hourly.time[i]).slice(0,16);
+        var parts = forecastTime.match(/^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2})$/);
+        if (!parts) continue;
+        var forecastStamp = Date.UTC(Number(parts[1]), Number(parts[2])-1, Number(parts[3]), Number(parts[4]), Number(parts[5]));
+        var diff = Math.abs(forecastStamp - target.timestamp);
         if (diff < bestDiff) { bestDiff = diff; best = i; }
       }
-      if (best < 0 || bestDiff > 3 * 60 * 60 * 1000) {
-        values.textContent = "На выбранное время прогноз пока не предоставлен.";
+      if (best < 0) {
+        values.textContent = "В ответе сервиса нет почасовых точек прогноза.";
       } else {
         var dir = windDirection(hourly.wind_direction_10m[best]);
         var suitable = spot.sector.indexOf(dir) !== -1 || spot.name.indexOf("Аэродром") === 0 || spot.name.indexOf("Сокольники") === 0;
@@ -1100,8 +1114,11 @@
           weatherNumber(hourly.wind_speed_10m[best]) + " м/с · порывы " + weatherNumber(hourly.wind_gusts_10m[best]) +
           " м/с · ☔ " + weatherNumber(hourly.precipitation_probability[best]) + "% (" +
           weatherNumber(hourly.precipitation[best]) + " мм) · ☁ " + weatherNumber(hourly.cloud_cover[best]) + "%";
+        var selectedTime = String(hourly.time[best]).slice(0,16).replace("T"," ");
+        var deltaMinutes = Math.round(bestDiff / 60000);
         note.textContent = (suitable ? "✓ Направление в рабочем секторе" : "⚠ Направление вне рабочего сектора") +
-          " · " + target.toLocaleString("ru-RU", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+          " · ближайший прогноз: " + selectedTime + " (Калининград)" +
+          (deltaMinutes ? " · отличие от времени вылета " + deltaMinutes + " мин." : " · точное время");
         note.className = "flight-weather-note " + (suitable ? "weather-good" : "weather-bad");
       }
     }
