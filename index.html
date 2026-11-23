@@ -110,9 +110,9 @@
   .weather-spot { gap:8px; }
   .weather-current { font-size:13px; color:#334155; }
   .weather-loading { color:#64748B; font-size:13px; padding:12px 0; }
-  .flight-weather { background:#F0F9FF; border:1px solid #BAE6FD; border-radius:9px; padding:9px 10px; display:flex; flex-direction:column; gap:5px; }
-  .flight-weather-title { font-size:12px; font-weight:800; color:#075985; }
-  .flight-weather-values { font-size:12px; line-height:1.6; color:#0F172A; }
+  .flight-weather { background:#fff; border:1px solid #E2E8F0; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.03); }
+  .flight-weather-title { font-size:14px; font-weight:700; color:#0F172A; }
+  .flight-weather-values { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:9px; padding:9px; font-size:13px; line-height:1.7; color:#0F172A; }
   .flight-weather-note { font-size:11px; color:#475569; }
   @media (max-width:360px) { .weather-grid { grid-template-columns:1fr; } }
 
@@ -988,7 +988,12 @@
 
   function windDirection(degrees) {
     var dirs = ["С","СВ","В","ЮВ","Ю","ЮЗ","З","СЗ"];
-    return dirs[Math.round(Number(degrees) / 45) % 8];
+    var value = Number(degrees);
+    if (!Number.isFinite(value)) return "—";
+    return dirs[Math.round(((value % 360) + 360) % 360 / 45) % 8];
+  }
+  function windDirectionWithDegrees(degrees) {
+    return windDirection(degrees) + " (" + weatherNumber(degrees) + "°)";
   }
   function weatherDate(value) {
     var d = new Date(value + "T12:00:00");
@@ -1015,7 +1020,7 @@
     current.className = "weather-current";
     var cw = data.current || {};
     current.textContent = "Сейчас: " + weatherNumber(cw.temperature_2m) + " °C · ветер " +
-      weatherNumber(cw.wind_speed_10m) + " м/с " + windDirection(cw.wind_direction_10m) +
+      weatherNumber(cw.wind_speed_10m) + " м/с " + windDirectionWithDegrees(cw.wind_direction_10m) +
       (cw.precipitation != null ? " · осадки " + cw.precipitation + " мм" : "");
     card.appendChild(current);
 
@@ -1025,6 +1030,7 @@
     var count = Math.min((daily.time || []).length, 3);
     for (var i = 0; i < count; i++) {
       var direction = windDirection(daily.wind_direction_10m_dominant[i]);
+      var directionLabel = windDirectionWithDegrees(daily.wind_direction_10m_dominant[i]);
       var speed = weatherNumber(daily.wind_speed_10m_max[i]);
       var isAnyWind = spot.name.indexOf("Аэродром") === 0 || spot.name.indexOf("Сокольники") === 0;
       var suitable = isAnyWind || spot.sector.indexOf(direction) !== -1;
@@ -1033,7 +1039,7 @@
       var label = document.createElement("strong");
       label.textContent = weatherDate(daily.time[i]);
       var wind = document.createElement("div");
-      wind.textContent = direction + " · до " + speed + " м/с";
+      wind.textContent = directionLabel + " · до " + speed + " м/с";
       wind.className = suitable ? "weather-good" : "weather-bad";
       var temp = document.createElement("div");
       temp.textContent = "🌡 " + weatherNumber(daily.temperature_2m_min[i]) + "… " +
@@ -1108,9 +1114,10 @@
         values.textContent = "В ответе сервиса нет почасовых точек прогноза.";
       } else {
         var dir = windDirection(hourly.wind_direction_10m[best]);
+        var dirLabel = windDirectionWithDegrees(hourly.wind_direction_10m[best]);
         var suitable = spot.sector.indexOf(dir) !== -1 || spot.name.indexOf("Аэродром") === 0 || spot.name.indexOf("Сокольники") === 0;
         values.textContent = "🌡 " + weatherNumber(hourly.temperature_2m[best]) + " °C · 💨 " + dir + " " +
-          weatherNumber(hourly.wind_speed_10m[best]) + " м/с · порывы " + weatherNumber(hourly.wind_gusts_10m[best]) +
+          weatherNumber(hourly.wind_speed_10m[best]) + " м/с " + dirLabel + " · порывы " + weatherNumber(hourly.wind_gusts_10m[best]) +
           " м/с · ☔ " + weatherNumber(hourly.precipitation_probability[best]) + "% (" +
           weatherNumber(hourly.precipitation[best]) + " мм) · ☁ " + weatherNumber(hourly.cloud_cover[best]) + "%";
         var selectedTime = String(hourly.time[best]).slice(0,16).replace("T"," ");
