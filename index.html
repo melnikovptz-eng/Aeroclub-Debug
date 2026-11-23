@@ -311,10 +311,20 @@
     "Niviuk Hook 6": { brand:"NIVIUK", klass:"EN-B", area:"23–27 м²", span:"11,2 м", aspect:"5,3", cells:"не указано", load:"70–100 кг", weight:"4,5 кг", speed:"22–49 км/ч", glide:"около 9,5", flights:121, hours:67.0, year:2023, condition:"Хорошее", inspection:"09.09.2026" },
     "Skywalk Chili 5": { brand:"SKYWALK", klass:"EN-B", area:"24–28 м²", span:"11,7 м", aspect:"5,6", cells:"не указано", load:"75–105 кг", weight:"4,8 кг", speed:"22–51 км/ч", glide:"около 9,8", flights:103, hours:56.0, year:2024, condition:"Хорошее", inspection:"22.08.2026" }
   };
+  demoWingSpecs["ParAAvis TT S"] = {
+    brand:"ParAAvis", klass:"Точность приземления", area:"26,0 м²", span:"11,6 м", aspect:"5,16",
+    cells:"36", load:"70–95 кг", weight:"не указано производителем", speed:"не указано", glide:"не указано",
+    flights:null, hours:null, year:null, condition:"Не указано", inspection:"Не указано",
+    image:"https://www.firstep.ru/shop/paraplans/paraavis-tt/pix/TT_01.jpg",
+    imageSource:"https://www.firstep.ru/shop/paraplans/paraplans.php",
+    source:"https://www.paraavis.com/paragliders/free-flying/tt/"
+  };
   var demoWingOwners = ["Ozone Buzz Z7","Advance Alpha 7","Skywalk Mescal 6","Gin Explorer 2","Nova Ion 6","BGD Epic 2","Ozone Rush 6","Advance Epsilon 9","Niviuk Hook 6","Skywalk Chili 5"];
   for (var wi = 0; wi < users.length; wi++) {
     users[wi].wing = demoWingOwners[wi % demoWingOwners.length];
   }
+  // Реальное крыло Сергея по данным производителя ParAAvis.
+  users[0].wing = "ParAAvis TT S";
 
   var spotSectors = {
     "п. Куликово (Склон)": ["С", "СВ"],
@@ -778,9 +788,18 @@
     var title = document.createElement("div");
     title.innerHTML = "<div class='wing-brand'>" + d.brand + "</div><h2 style='margin:2px 0 0'>" + wing + "</h2><div class='sub'>Класс " + d.klass + "</div>";
     modal.appendChild(title);
+    if (d.image) {
+      var wingPhoto = document.createElement("img");
+      wingPhoto.src = d.image; wingPhoto.alt = "Параплан ParAAvis TT в полёте";
+      wingPhoto.style.cssText = "display:block;width:100%;max-height:230px;object-fit:cover;border-radius:14px;margin:14px 0 8px;background:#eef2f7;";
+      wingPhoto.loading = "lazy"; modal.appendChild(wingPhoto);
+      var photoLink = document.createElement("a"); photoLink.href = d.imageSource; photoLink.target = "_blank"; photoLink.rel = "noopener";
+      photoLink.textContent = "Фото ParAAvis TT · источник"; photoLink.style.cssText = "display:block;font-size:12px;margin:-2px 0 12px;color:var(--accent,#2563eb);";
+      modal.appendChild(photoLink);
+    }
     var note = document.createElement("div");
     note.className = "warn-box";
-    note.textContent = "ДЕМО-РЕЖИМ: характеристики и статистика условные, добавлены для проверки интерфейса. Не использовать для подбора крыла или оценки его безопасности.";
+    note.textContent = d.source ? "Характеристики крыла взяты со страницы производителя. Данные об эксплуатации именно этого экземпляра не опубликованы и не указаны." : "ДЕМО-РЕЖИМ: характеристики и статистика условные, добавлены для проверки интерфейса. Не использовать для подбора крыла или оценки его безопасности.";
     modal.appendChild(note);
     function section(label, rows) {
       var h = document.createElement("div"); h.className = "wing-section-title"; h.textContent = label; modal.appendChild(h);
@@ -797,8 +816,8 @@
       ["Полётный вес",d.load],["Вес крыла",d.weight],["Скорость",d.speed],["Аэродинамическое качество",d.glide]
     ]);
     section("Статистика эксплуатации", [
-      ["Год выпуска",String(d.year)],["Количество полётов",String(d.flights)],["Налёт",d.hours.toFixed(1)+" ч"],
-      ["Состояние",d.condition],["Последняя проверка",d.inspection],["Сертификация",d.klass]
+      ["Год выпуска",d.year == null ? "Не указано" : String(d.year)],["Количество полётов",d.flights == null ? "Не указано" : String(d.flights)],["Налёт",d.hours == null ? "Не указано" : d.hours.toFixed(1)+" ч"],
+      ["Состояние",d.condition],["Последняя проверка",d.inspection],["Категория",d.klass]
     ]);
     var close = document.createElement("button"); close.className = "btn"; close.textContent = "Закрыть";
     close.onclick = function() { bg.remove(); };
