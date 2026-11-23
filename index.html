@@ -377,12 +377,12 @@
   };
 
   var flights = [
-    { id: 1, month: "Ноябрь 2026", date: "26 ноября", time: "10:00–14:00", spot: "п. Куликово (Склон)", wind: "💨 СВ 5–7 м/с", isComp: false, disc: "Динамик на склоне", initId: 11, limit: 15, canceled: false, shiftedFrom: "", shiftReason: "", g: [1, 11, 2, 3, 4], r: [5], b: [2, 4], rides: { 2: 1 } },
-    { id: 2, month: "Ноябрь 2026", date: "29 ноября", time: "09:30–13:30", spot: "Аэродром «Северный» (Лебёдка)", wind: "💨 Ю 3–4 м/с", isComp: false, disc: "Лебёдочные затяжки", initId: 5, limit: 12, canceled: false, shiftedFrom: "28 ноября", shiftReason: "Дождь в субботу", g: [5, 11, 3], r: [1], b: [4], rides: {} },
-    { id: 3, month: "Декабрь 2026", date: "5 декабря", time: "10:00–15:00", spot: "п. Донское (Склон)", wind: "💨 СЗ 6–8 м/с", isComp: true, disc: "Точность приземления", initId: 1, limit: 20, canceled: false, shiftedFrom: "", shiftReason: "", g: [1, 3, 5, 11], r: [], b: [2], rides: { 2: 3 } },
-    { id: 4, month: "Декабрь 2026", date: "12 декабря", time: "10:00–14:00", spot: "п. Сокольники (Поле)", wind: "💨 Штиль 1–2 м/с", isComp: false, disc: "Наземная подготовка", initId: 5, limit: 15, canceled: false, shiftedFrom: "", shiftReason: "", g: [5, 4], r: [], b: [], rides: {} },
-    { id: 5, month: "Декабрь 2026", date: "19 декабря", time: "10:00–15:00", spot: "п. Янтарный (Склон)", wind: "💨 ЮЗ 5–7 м/с", isComp: true, disc: "Маршрутная гонка (XC)", initId: 1, limit: 18, canceled: false, shiftedFrom: "20 декабря", shiftReason: "Рабочий бриз в субботу", g: [1, 11, 2, 3], r: [4], b: [5], rides: { 2: 11 } },
-    { id: 6, month: "Январь 2027", date: "4 января", time: "11:00–15:00", spot: "п. Куликово (Склон)", wind: "💨 С 6–7 м/с", isComp: false, disc: "Новогодний динамик", initId: 5, limit: 20, canceled: false, shiftedFrom: "", shiftReason: "", g: [5, 1, 11], r: [], b: [], rides: {} }
+    { id: 1, month: "Ноябрь 2026", date: "26 ноября", time: "10:00–14:00", spot: "п. Куликово (Склон)", wind: "💨 СВ 5–7 м/с", radio: "500.000 / 455.000 МГц", isComp: false, disc: "Динамик на склоне", initId: 11, limit: 15, canceled: false, shiftedFrom: "", shiftReason: "", g: [1, 11, 2, 3, 4], r: [5], b: [2, 4], rides: { 2: 1 } },
+    { id: 2, month: "Ноябрь 2026", date: "29 ноября", time: "09:30–13:30", spot: "Аэродром «Северный» (Лебёдка)", wind: "💨 Ю 3–4 м/с", radio: "500.000 / 455.000 МГц", isComp: false, disc: "Лебёдочные затяжки", initId: 5, limit: 12, canceled: false, shiftedFrom: "28 ноября", shiftReason: "Дождь в субботу", g: [5, 11, 3], r: [1], b: [4], rides: {} },
+    { id: 3, month: "Декабрь 2026", date: "5 декабря", time: "10:00–15:00", spot: "п. Донское (Склон)", wind: "💨 СЗ 6–8 м/с", radio: "500.000 / 455.000 МГц", isComp: true, disc: "Точность приземления", initId: 1, limit: 20, canceled: false, shiftedFrom: "", shiftReason: "", g: [1, 3, 5, 11], r: [], b: [2], rides: { 2: 3 } },
+    { id: 4, month: "Декабрь 2026", date: "12 декабря", time: "10:00–14:00", spot: "п. Сокольники (Поле)", wind: "💨 Штиль 1–2 м/с", radio: "500.000 / 455.000 МГц", isComp: false, disc: "Наземная подготовка", initId: 5, limit: 15, canceled: false, shiftedFrom: "", shiftReason: "", g: [5, 4], r: [], b: [], rides: {} },
+    { id: 5, month: "Декабрь 2026", date: "19 декабря", time: "10:00–15:00", spot: "п. Янтарный (Склон)", wind: "💨 ЮЗ 5–7 м/с", radio: "500.000 / 455.000 МГц", isComp: true, disc: "Маршрутная гонка (XC)", initId: 1, limit: 18, canceled: false, shiftedFrom: "20 декабря", shiftReason: "Рабочий бриз в субботу", g: [1, 11, 2, 3], r: [4], b: [5], rides: { 2: 11 } },
+    { id: 6, month: "Январь 2027", date: "4 января", time: "11:00–15:00", spot: "п. Куликово (Склон)", wind: "💨 С 6–7 м/с", radio: "500.000 / 455.000 МГц", isComp: false, disc: "Новогодний динамик", initId: 5, limit: 20, canceled: false, shiftedFrom: "", shiftReason: "", g: [5, 1, 11], r: [], b: [], rides: {} }
   ];
 
   function getUser(id) {
@@ -496,7 +496,7 @@
     }
     c.appendChild(badges);
     var radioLine = document.createElement("div"); radioLine.className = "radio-line";
-    radioLine.textContent = "📻 Рация: " + RADIO_FREQUENCIES; c.appendChild(radioLine);
+    radioLine.textContent = "📻 Рация: " + f.radio; c.appendChild(radioLine);
 
     var initU = getUser(f.initId);
     var il = document.createElement("div");
@@ -617,7 +617,7 @@
     var bw = document.createElement("span"); bw.className = "badge b-wind"; bw.textContent = f.wind; b1.appendChild(bw);
     c1.appendChild(b1);
     var radioLine = document.createElement("div"); radioLine.className = "radio-line";
-    radioLine.textContent = "📻 Рация: " + RADIO_FREQUENCIES; c1.appendChild(radioLine);
+    radioLine.textContent = "📻 Рация: " + f.radio; c1.appendChild(radioLine);
     var s1 = document.createElement("div"); s1.className = "sub"; s1.textContent = "🕒 " + f.time + " · Лимит: " + f.g.length + "/" + f.limit + " чел.";
     c1.appendChild(s1);
     box.appendChild(c1);
@@ -833,6 +833,7 @@
       time: document.getElementById("mf-time").value,
       spot: document.getElementById("mf-spot").value,
       wind: document.getElementById("mf-wind").value,
+      radio: RADIO_FREQUENCIES,
       isComp: document.getElementById("mf-comp").checked,
       disc: document.getElementById("mf-disc").value,
       initId: initId,
