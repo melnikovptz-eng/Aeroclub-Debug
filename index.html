@@ -1122,20 +1122,32 @@
     if (refresh) { refresh.disabled = true; refresh.textContent = "Загрузка…"; }
     if (status) status.textContent = "Обновляем прогноз…";
     try {
-      var lat = weatherSpots.map(function(x) { return x.lat; }).join(",");
-      var lon = weatherSpots.map(function(x) { return x.lon; }).join(",");
-      var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat +
-        "&longitude=" + lon +
-        "&current=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation" +
-        "&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m" +
-        "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant" +
-        "&forecast_days=16&wind_speed_unit=ms&timezone=Europe%2FKaliningrad";
-      var response = await fetch(url);
-      if (!response.ok) throw new Error("Сервис погоды ответил: " + response.status);
-      var result = await response.json();
-      var data = Array.isArray(result) ? result : [result];
-      if (!data.length || !data[0].daily) throw new Error("Сервис не вернул прогноз");
+      // Запрашиваем каждый спот отдельно: сбой одной координаты не ломает погоду на остальных.
+      var requests = await Promise.all(weatherSpots.map(async function(spot) {
+        try {
+          var params = new URLSearchParams({
+            latitude: String(spot.lat),
+            longitude: String(spot.lon),
+            current: "temperature_2m,wind_speed_10m,wind_direction_10m,precipitation",
+            hourly: "temperature_2m,precipitation_probability,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+            daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant",
+            forecast_days: "16",
+            wind_speed_unit: "ms",
+            timezone: "Europe%2FKaliningrad"
+          });
+          var response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString());
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          var json = await response.json();
+          if (!json || !json.daily || !json.hourly) throw new Error("Неполный ответ прогноза");
+          return json;
+        } catch (spotError) {
+          return { _error: String(spotError && spotError.message || spotError) };
+        }
+      }));
+      var data = requests;
       weatherDataBySpot = data;
+      var successful = data.filter(function(item) { return item && item.daily && item.hourly; });
+      if (!successful.length) throw new Error("Не удалось получить прогноз ни для одного спота");
       updateFeaturedFlightWeather();
       currentBox.innerHTML = "";
       var title = document.createElement("div");
@@ -1144,16 +1156,28 @@
       currentBox.appendChild(title);
       var summary = document.createElement("div");
       summary.className = "weather-current";
-      var first = data[0].current || {};
-      summary.textContent = "Калининград: " + weatherNumber(first.temperature_2m) + " °C · ветер " +
-        weatherNumber(first.wind_speed_10m) + " м/с " + windDirection(first.wind_direction_10m);
+      var firstIndex = data.findIndex(function(item) { return item && item.current; });
+      var first = firstIndex >= 0 ? data[firstIndex].current : {};
+      summary.textContent = firstIndex >= 0
+        ? "Калининградская область: " + weatherNumber(first.temperature_2m) + " °C · ветер " +
+          weatherNumber(first.wind_speed_10m) + " м/с " + windDirection(first.wind_direction_10m)
+        : "Текущие условия пока недоступны";
       currentBox.appendChild(summary);
       spotsBox.innerHTML = "";
+      var failed = 0;
       for (var i = 0; i < weatherSpots.length; i++) {
-        if (data[i]) spotsBox.appendChild(weatherCard(weatherSpots[i], data[i]));
+        if (data[i] && data[i].daily) spotsBox.appendChild(weatherCard(weatherSpots[i], data[i]));
+        else {
+          failed++;
+          var errorCard = document.createElement("div");
+          errorCard.className = "card weather-error";
+          errorCard.textContent = weatherSpots[i].name + ": прогноз временно недоступен.";
+          spotsBox.appendChild(errorCard);
+        }
       }
-      weatherLoaded = true;
-      if (status) status.textContent = "Обновлено: " + new Date().toLocaleString("ru-RU");
+      weatherLoaded = successful.length > 0;
+      if (status) status.textContent = "Обновлено: " + new Date().toLocaleString("ru-RU") +
+        (failed ? " · доступно " + successful.length + " из " + weatherSpots.length + " спотов" : " · все споты загружены");
     } catch (error) {
       if (status) status.textContent = "Не удалось обновить прогноз";
       if (currentBox) currentBox.innerHTML =
