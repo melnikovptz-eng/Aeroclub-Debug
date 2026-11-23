@@ -78,6 +78,8 @@
   .p-row:last-child { border-bottom: none; }
   .p-left { display: flex; align-items: center; gap: 9px; }
   .comm-icons { display: flex; align-items: center; gap: 5px; }
+  .wing-line { margin-top: 2px; }
+  .wing-link { border: 0; padding: 0; background: none; color: #2563EB; font: inherit; text-decoration: underline; cursor: pointer; }
   .ico-btn { text-decoration: none; font-size: 11px; font-weight: 700; padding: 4px 7px; border-radius: 7px; display: inline-flex; align-items: center; gap: 2px; }
   .ico-tel { background: #DCFCE7; color: #15803D; }
   .ico-max { background: #F3E8FF; color: #6B21A8; }
@@ -713,7 +715,23 @@
       var left = document.createElement("div"); left.className = "p-left";
       left.appendChild(makeAvatar(u, true));
       var info = document.createElement("div");
-      info.innerHTML = "<b>" + u.name + "</b><div class='sub'>" + u.role + " · " + u.wing + (u.car ? " · 🚗 +" + u.seats : "") + "</div>";
+      info.innerHTML = "<b>" + u.name + "</b><div class='sub'>" + u.role + (u.car ? " · 🚗 +" + u.seats : "") + "</div>";
+      var wingLine = document.createElement("div");
+      wingLine.className = "sub wing-line";
+      wingLine.appendChild(document.createTextNode("Крыло: "));
+      if (u.wing && u.wing !== "—") {
+        var wingLink = document.createElement("button");
+        wingLink.type = "button";
+        wingLink.className = "wing-link";
+        wingLink.textContent = u.wing;
+        wingLink.onclick = (function(wing) { return function() {
+          alert("Характеристики крыла: " + wing + "\n\nТехнические данные будут добавлены после указания точной модели и модификации.");
+        }; })(u.wing);
+        wingLine.appendChild(wingLink);
+      } else {
+        wingLine.appendChild(document.createTextNode("не указано"));
+      }
+      info.appendChild(wingLine);
       left.appendChild(info);
       row.appendChild(left);
       row.appendChild(makeCommIcons(u));
