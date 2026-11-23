@@ -88,13 +88,14 @@
   .wing-spec span { display:block; color:#64748B; font-size:10px; margin-bottom:3px; }
   .wing-spec b { display:block; color:#0F172A; font-size:12px; overflow-wrap:anywhere; }
 
-  .ico-btn { text-decoration: none; font-size: 11px; font-weight: 700; padding: 4px 7px; border-radius: 7px; display: inline-flex; align-items: center; gap: 2px; }
-  .ico-tel { background: #DCFCE7; color: #15803D; }
-  .ico-max { width:30px; height:30px; padding:0; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#00BFFF 0%,#471AFF 55%,#9500FF 100%); box-shadow:0 2px 5px rgba(71,26,255,.22); transition:transform .15s ease,box-shadow .15s ease; }
-  .ico-max:hover { transform:translateY(-1px); box-shadow:0 4px 9px rgba(71,26,255,.3); }
-  .ico-max svg { display:block; width:21px; height:21px; }
-  .ico-max:focus-visible { outline:3px solid #00BFFF; outline-offset:2px; }
-  .ico-tg  { background: #DBEAFE; color: #1D4ED8; }
+  .ico-btn { box-sizing:border-box; width:32px; height:32px; padding:0; flex:0 0 32px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; font-size:18px; line-height:1; }
+  .ico-tel { background:#DCFCE7; color:#15803D; }
+  .ico-max { overflow:hidden; background:#fff; box-shadow:0 1px 4px rgba(15,23,42,.16); transition:transform .15s ease,box-shadow .15s ease; }
+  .ico-max:hover { transform:translateY(-1px); box-shadow:0 3px 8px rgba(15,23,42,.22); }
+  .ico-max img { display:block; width:32px; height:32px; object-fit:cover; }
+  .ico-max:focus-visible,.ico-tg:focus-visible,.ico-tel:focus-visible { outline:3px solid #471AFF; outline-offset:2px; }
+  .ico-tg { background:#229ED9; color:#fff; }
+  .ico-tg svg { display:block; width:20px; height:20px; }
 
   /* Погода */
   .weather-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
@@ -396,10 +397,20 @@
       a2.rel = "noopener noreferrer";
       a2.setAttribute("aria-label", "Написать в MAX");
       a2.setAttribute("title", "Открыть MAX");
-      a2.innerHTML = '<svg viewBox="0 0 48 48" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M24 5.5c-10.2 0-18.5 7.4-18.5 16.6 0 5.1 2.6 9.7 6.8 12.8l-1.5 7.6 8.1-4.2c1.6.4 3.3.6 5.1.6 10.2 0 18.5-7.4 18.5-16.6S34.2 5.5 24 5.5Z"/><path fill="url(#maxMark)" d="M15 25.8 22.1 16l5.2 6.2 5.7-4.5-7.1 14.1-5.3-6.1-5.6 4.4Z"/><defs><linearGradient id="maxMark" x1="15" y1="16" x2="33" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#00BFFF"/><stop offset="1" stop-color="#9500FF"/></linearGradient></defs></svg>';
+      a2.innerHTML = '<img src="https://max.ru/s/img/big-logo.png" alt="" aria-hidden="true">';
       box.appendChild(a2);
     }
-    if (u.tg) { var a3 = document.createElement("a"); a3.className = "ico-btn ico-tg"; a3.href = "https://t.me/" + u.tg; a3.target = "_blank"; a3.rel = "noopener"; a3.textContent = "TG"; box.appendChild(a3); }
+    if (u.tg) {
+      var a3 = document.createElement("a");
+      a3.className = "ico-btn ico-tg";
+      a3.href = "https://t.me/" + encodeURIComponent(u.tg);
+      a3.target = "_blank";
+      a3.rel = "noopener noreferrer";
+      a3.setAttribute("aria-label", "Написать в Telegram");
+      a3.setAttribute("title", "Открыть Telegram");
+      a3.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M21.8 4.2 18.5 20c-.25 1.12-.91 1.4-1.84.87l-5.08-3.74-2.45 2.36c-.27.27-.5.5-1.02.5l.36-5.17 9.4-8.5c.41-.36-.09-.56-.64-.2L5.62 13.35.63 11.8c-1.08-.34-1.1-1.08.23-1.61L20.37 2.6c.9-.33 1.69.22 1.43 1.6Z"/></svg>';
+      box.appendChild(a3);
+    }
     return box;
   }
 
