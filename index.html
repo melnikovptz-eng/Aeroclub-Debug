@@ -76,7 +76,7 @@
 
   .p-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; gap: 8px; flex-wrap: wrap; }
   .p-row:last-child { border-bottom: none; }
-  .p-left { display: flex; align-items: center; gap: 9px; }
+  .p-left { display: flex; align-items: flex-start; gap: 9px; min-width: 0; }
   .comm-icons { display: flex; align-items: center; gap: 5px; }
   .wing-line { margin-top: 2px; }
   .wing-link { border: 0; padding: 0; background: none; color: #2563EB; font: inherit; text-decoration: underline; cursor: pointer; }
@@ -732,9 +732,11 @@
         wingLine.appendChild(document.createTextNode("не указано"));
       }
       info.appendChild(wingLine);
+      var contacts = makeCommIcons(u);
+      contacts.style.marginTop = "6px";
+      info.appendChild(contacts);
       left.appendChild(info);
       row.appendChild(left);
-      row.appendChild(makeCommIcons(u));
       box.appendChild(row);
     }
   }
