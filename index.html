@@ -40,6 +40,8 @@
   .b-shift { background: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
   .b-car { background: #EFF6FF; color: #1D4ED8; }
   .b-canc { background: #FEE2E2; color: #B91C1C; }
+  .b-location { display:inline-flex; align-items:center; gap:4px; text-decoration:none; background:#E0F2FE; color:#0369A1; border:1px solid #BAE6FD; cursor:pointer; }
+  .b-location:active { opacity:.75; }
 
   /* Инициатор и аватарки-инициалы */
   .init-line { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; }
@@ -478,6 +480,18 @@
     var bd = document.createElement("span"); bd.className = "badge b-disc"; bd.textContent = f.disc; badges.appendChild(bd);
     var bw = document.createElement("span"); bw.className = "badge b-wind"; bw.textContent = f.wind; badges.appendChild(bw);
     var bcar = document.createElement("span"); bcar.className = "badge b-car"; bcar.textContent = "🚗 Свободно мест: " + calcFreeSeats(f); badges.appendChild(bcar);
+    if (isFeat && f.spot) {
+      var locationLink = document.createElement("a");
+      locationLink.className = "badge b-location";
+      locationLink.href = "https://yandex.ru/maps/?text=" + encodeURIComponent(f.spot);
+      locationLink.target = "_blank";
+      locationLink.rel = "noopener noreferrer";
+      locationLink.textContent = "📍 Локация";
+      locationLink.setAttribute("aria-label", "Открыть " + f.spot + " в Яндекс Картах");
+      locationLink.title = "Открыть " + f.spot + " в Яндекс Картах";
+      locationLink.onclick = function(event) { event.stopPropagation(); };
+      badges.appendChild(locationLink);
+    }
     c.appendChild(badges);
 
     var initU = getUser(f.initId);
