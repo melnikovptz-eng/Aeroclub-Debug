@@ -1135,13 +1135,27 @@
             wind_speed_unit: "ms",
             timezone: "Europe/Kaliningrad"
           });
-          var response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString());
+          var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+          var timeout = controller ? setTimeout(function() { controller.abort(); }, 15000) : null;
+          var response;
+          try {
+            response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString(), {
+              method: "GET",
+              cache: "no-store",
+              signal: controller ? controller.signal : undefined
+            });
+          } finally {
+            if (timeout) clearTimeout(timeout);
+          }
           if (!response.ok) throw new Error("HTTP " + response.status);
           var json = await response.json();
           if (!json || !json.daily || !json.hourly) throw new Error("Неполный ответ прогноза");
           return json;
         } catch (spotError) {
-          return { _error: String(spotError && spotError.message || spotError) };
+          var reason = spotError && spotError.name === "AbortError"
+            ? "Тайм-аут запроса (15 секунд)"
+            : String(spotError && spotError.message || spotError);
+          return { _error: reason };
         }
       }));
       var data = requests;
@@ -1175,7 +1189,8 @@
           spotsBox.appendChild(errorCard);
         }
       }
-      weatherLoaded = successful.length > 0;
+      // Если хотя бы один спот не загрузился, при следующем открытии вкладки повторяем запрос.
+      weatherLoaded = successful.length === weatherSpots.length;
       if (status) status.textContent = "Обновлено: " + new Date().toLocaleString("ru-RU") +
         (failed ? " · доступно " + successful.length + " из " + weatherSpots.length + " спотов" : " · все споты загружены");
     } catch (error) {
@@ -1184,7 +1199,20 @@
         '<div class="title" style="font-size:15px">Погода временно недоступна</div>' +
         '<div class="weather-error">Проверьте подключение к интернету и нажмите «Обновить». ' +
         'Последние данные не подменяются вымышленными значениями.</div>';
-      if (spotsBox && !spotsBox.children.length) spotsBox.innerHTML = "";
+      if (spotsBox) {
+        spotsBox.innerHTML = "";
+        for (var e = 0; e < weatherSpots.length; e++) {
+          var reason = weatherDataBySpot[e] && weatherDataBySpot[e]._error
+            ? weatherDataBySpot[e]._error
+            : String(error && error.message || error || "Неизвестная ошибка");
+          var errorCard = document.createElement("div");
+          errorCard.className = "card weather-error";
+          errorCard.textContent = weatherSpots[e].name + ": " + reason +
+            ". Проверь интернет и нажми «Обновить».";
+          spotsBox.appendChild(errorCard);
+        }
+      }
+      weatherLoaded = false;
     } finally {
       weatherLoading = false;
       if (refresh) { refresh.disabled = false; refresh.textContent = "↻ Обновить"; }
