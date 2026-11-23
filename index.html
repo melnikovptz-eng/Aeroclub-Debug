@@ -661,6 +661,46 @@
     }
     box.appendChild(c3);
 
+    // Остальные статусы: ожидают решения, не едут и ещё не ответили.
+    function appendStatusGroup(title, ids, color) {
+      var card = document.createElement("div"); card.className = "card";
+      var heading = document.createElement("div"); heading.className = "title";
+      heading.style.fontSize = "15px"; heading.style.color = color;
+      heading.textContent = title + " (" + ids.length + ")";
+      card.appendChild(heading);
+      if (!ids.length) {
+        var empty = document.createElement("div"); empty.className = "sub";
+        empty.textContent = "Пока никого нет.";
+        card.appendChild(empty);
+      }
+      for (var si = 0; si < ids.length; si++) {
+        var su = getUser(ids[si]);
+        var srow = document.createElement("div"); srow.className = "p-row";
+        var sleft = document.createElement("div"); sleft.className = "p-left";
+        sleft.appendChild(makeAvatar(su, true));
+        var sinfo = document.createElement("div");
+        sinfo.innerHTML = "<b>" + su.name + "</b><div class='sub'>" + su.role + "</div><div class='sub'>Крыло: " + su.wing + "</div>";
+        var scontacts = makeCommIcons(su); scontacts.style.marginTop = "6px";
+        sinfo.appendChild(scontacts); sleft.appendChild(sinfo); srow.appendChild(sleft);
+        card.appendChild(srow);
+      }
+      box.appendChild(card);
+    }
+
+    var confirmedIds = f.g.slice();
+    var refusedIds = f.r.filter(function(id) { return confirmedIds.indexOf(id) === -1; });
+    var maybeIds = f.b.filter(function(id) {
+      return confirmedIds.indexOf(id) === -1 && refusedIds.indexOf(id) === -1;
+    });
+    var answeredIds = confirmedIds.concat(refusedIds, maybeIds);
+    var unansweredIds = users.map(function(u) { return u.id; }).filter(function(id) {
+      return answeredIds.indexOf(id) === -1;
+    });
+
+    appendStatusGroup("По погоде", maybeIds, "#1D4ED8");
+    appendStatusGroup("Не поедут", refusedIds, "#B91C1C");
+    appendStatusGroup("Не подтвердили", unansweredIds, "#64748B");
+
     go("details");
   }
 
