@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Парапланы КЛД v14</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  html, body { height: 100%; overflow: hidden; background: #F8FAFC; color: #0F172A; }
+  .app { max-width: 720px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
+  .hide { display: none !important; }
+  
+  /* Экраны */
+  .screen { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .fixed-zone { padding: 14px 16px 0 16px; flex-shrink: 0; background: #F8FAFC; }
+  .scroll-zone { flex: 1; overflow-y: auto; padding: 12px 16px 84px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .page-scroll { flex: 1; overflow-y: auto; padding: 14px 16px 84px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Шапка */
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  h1 { font-size: 20px; font-weight: 700; }
+  .role-pill { background: #E2E8F0; border: none; padding: 6px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .role-pill.rp { background: #DBEAFE; color: #1D4ED8; }
+  .btn { background: #2563EB; color: #fff; border: none; padding: 9px 14px; border-radius: 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-sm { background: #E2E8F0; color: #0F172A; border: none; padding: 7px 11px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn-warn { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; padding: 7px 11px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+  /* Карточки */
+  .card { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 9px; }
+  .card.click { cursor: pointer; }
+  .card.canceled { opacity: 0.65; background: #F1F5F9; }
+  .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .title { font-size: 17px; font-weight: 600; }
+  .sub { font-size: 13px; color: #475569; }
+  .badges { display: flex; flex-wrap: wrap; gap: 5px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 6px; background: #F1F5F9; color: #334155; }
+  .b-wind { background: #DCFCE7; color: #15803D; }
+  .b-disc { background: #F3E8FF; color: #7E22CE; }
+  .b-comp { background: #FEF3C7; color: #B45309; }
+  .b-shift { background: #FFEDD5; color: #C2410C; border: 1px solid #FED7AA; }
+  .b-car { background: #EFF6FF; color: #1D4ED8; }
+  .b-canc { background: #FEE2E2; color: #B91C1C; }
+
+  /* Инициатор и аватарки-инициалы */
+  .init-line { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; }
+  .av-init { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #fff; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: -7px; }
+  .av-init:first-child { margin-left: 0; }
+  .av-lg { width: 32px; height: 32px; font-size: 14px; margin-left: 0; }
+
+  /* Плашки групп */
+  .groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pill { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px 4px 4px; border-radius: 99px; font-size: 13px; font-weight: 700; min-height: 30px; }
+  .g-green { background: #DCFCE7; color: #15803D; }
+  .g-red { background: #FEE2E2; color: #B91C1C; }
+  .g-blue { background: #DBEAFE; color: #1D4ED8; }
+  .avs { display: flex; align-items: center; }
+  .ext { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #fff; margin-left: -7px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+  .g-green .ext { background: #86EFAC; color: #14532D; }
+  .g-red .ext { background: #FCA5A5; color: #7F1D1D; }
+  .g-blue .ext { background: #93C5FD; color: #1E3A8A; }
+
+  /* Вкладки и чипсы */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #E2E8F0; margin-top: 8px; }
+  .tab { background: none; border: none; border-bottom: 3px solid transparent; padding: 10px; font-size: 14px; font-weight: 600; color: #64748B; cursor: pointer; }
+  .tab.active { color: #2563EB; border-bottom-color: #2563EB; }
+  .chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+  .chip { border: 1px solid #CBD5E1; background: #fff; color: #475569; padding: 5px 11px; border-radius: 99px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .chip.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+
+  /* Статусы, экипажи и иконки связи */
+  .st-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .st-btn { padding: 10px 4px; border-radius: 10px; border: 2px solid #E2E8F0; background: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .st-green { background: #DCFCE7; border-color: #16A34A; color: #15803D; }
+  .st-blue { background: #DBEAFE; border-color: #2563EB; color: #1D4ED8; }
+  .st-red { background: #FEE2E2; border-color: #DC2626; color: #B91C1C; }
+
+  .p-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; gap: 8px; flex-wrap: wrap; }
+  .p-row:last-child { border-bottom: none; }
+  .p-left { display: flex; align-items: center; gap: 9px; }
+  .comm-icons { display: flex; align-items: center; gap: 5px; }
+  .ico-btn { text-decoration: none; font-size: 11px; font-weight: 700; padding: 4px 7px; border-radius: 7px; display: inline-flex; align-items: center; gap: 2px; }
+  .ico-tel { background: #DCFCE7; color: #15803D; }
+  .ico-max { background: #F3E8FF; color: #6B21A8; }
+  .ico-tg  { background: #DBEAFE; color: #1D4ED8; }
+
+  /* Погода */
+  .weather-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .weather-meta { font-size:12px; color:#64748B; }
+  .weather-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .weather-day { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:9px; padding:9px; min-width:0; }
+  .weather-day strong { display:block; font-size:12px; margin-bottom:5px; }
+  .weather-day div { font-size:12px; line-height:1.5; }
+  .weather-good { color:#15803D; font-weight:700; }
+  .weather-bad { color:#B45309; font-weight:700; }
+  .weather-error { background:#FEF2F2; color:#991B1B; padding:10px; border-radius:9px; font-size:12px; }
+  .weather-spot { gap:8px; }
+  .weather-current { font-size:13px; color:#334155; }
+  .weather-loading { color:#64748B; font-size:13px; padding:12px 0; }
+  @media (max-width:360px) { .weather-grid { grid-template-columns:1fr; } }
+
+  /* Формы и модалка */
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #475569; font-weight: 600; }
+  .input { width: 100%; padding: 9px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; background: #fff; }
+  .warn-box { background: #FEF3C7; color: #92400E; padding: 8px; border-radius: 8px; font-size: 12px; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 99; }
+  .modal { background: #fff; border-radius: 14px; padding: 16px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 9px; max-height: 90vh; overflow-y: auto; }
+
+  /* Нижнее меню */
+  .nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 720px; margin: 0 auto; background: #fff; border-top: 1px solid #E2E8F0; display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; z-index: 50; }
+  .nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11px; color: #64748B; cursor: pointer; }
+  .nav button.active { color: #2563EB; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 1. ГЛАВНАЯ -->
+  <div id="v-home" class="screen">
+    <div class="fixed-zone">
+      <div class="top">
+        <h1>KD-PILOT</h1>
+        <div style="display:flex; gap:6px; align-items:center">
+          <button id="role-btn" class="role-pill rp" onclick="toggleRole()">Режим: РП</button>
+          <button id="create-btn" class="btn" onclick="openFlightModal(null)">+ Полёт</button>
+        </div>
+      </div>
+      <div id="featured"></div>
+      <div class="tabs">
+        <button class="tab active" onclick="setHomeTab('all', this)">Все полёты</button>
+        <button class="tab" onclick="setHomeTab('comp', this)">Соревнования</button>
+      </div>
+    </div>
+    <div id="list" class="scroll-zone"></div>
+  </div>
+
+  <!-- 2. ДЕТАЛИ ПОЛЁТА -->
+  <div id="v-details" class="screen hide">
+    <div class="fixed-zone" style="padding-bottom:10px; border-bottom:1px solid #E2E8F0">
+      <div class="top" style="margin-bottom:0">
+        <button class="btn-sm" onclick="go('home')">‹ Назад</button>
+        <div id="details-actions" style="display:flex; gap:6px"></div>
+      </div>
+    </div>
+    <div id="details-box" class="page-scroll"></div>
+  </div>
+
+  <!-- 3. КАЛЕНДАРЬ -->
+  <div id="v-cal" class="screen hide">
+    <div class="fixed-zone" style="padding-bottom:10px; border-bottom:1px solid #E2E8F0">
+      <div class="top">
+        <h1>Календарь полётов</h1>
+        <button id="cal-add-btn" class="btn" onclick="openFlightModal(null)">+ Выезд</button>
+      </div>
+      <div class="chips" id="cal-chips">
+        <button class="chip active" onclick="setCalFilter('all', this)">Все (7)</button>
+        <button class="chip" onclick="setCalFilter('comp', this)">🏆 Соревнования</button>
+        <button class="chip" onclick="setCalFilter('shifted', this)">📅 Перенесённые</button>
+      </div>
+    </div>
+    <div id="cal-list" class="scroll-zone"></div>
+  </div>
+
+  <!-- 4. ПОГОДА -->
+  <div id="v-weather" class="screen hide">
+    <div class="page-scroll" id="weather-content">
+      <div class="weather-head">
+        <h1>Погода · Споты области</h1>
+        <button class="btn-sm" id="weather-refresh" onclick="loadWeather(true)">↻ Обновить</button>
+      </div>
+      <div class="weather-meta" id="weather-updated">Прогноз загружается из Open-Meteo…</div>
+      <div id="weather-current" class="card">
+        <div class="title" style="font-size:15px">Текущие условия · Калининградская область</div>
+        <div class="weather-loading">Получаем актуальные данные…</div>
+      </div>
+      <div class="sub">Прогноз ветра на ближайшие 3 дня. Направление сопоставляется с рабочим сектором каждого спота. Данные прогноза, не гарантия безопасности полёта.</div>
+      <div id="weather-spots"></div>
+      <div class="sub">Источник: Open-Meteo. Скорость ветра указана в м/с.</div>
+    </div>
+  </div>
+
+    <!-- 5. УЧАСТНИКИ -->
+  <div id="v-pilots" class="screen hide">
+    <div class="page-scroll">
+      <h1>Участники клуба</h1>
+      <div id="pilots-box" class="card"></div>
+    </div>
+  </div>
+
+  <!-- 6. ПРОФИЛЬ -->
+  <div id="v-profile" class="screen hide">
+    <div class="page-scroll">
+      <h1>Мой профиль</h1>
+      <div id="profile-box" class="card"></div>
+      <div class="card">
+        <div class="title" style="font-size:15px">Справочник спотов Калининградской обл.</div>
+        <div class="sub">🌊 <b>п. Куликово</b> — ветер С, СВ (динамик)</div>
+        <div class="sub">🌊 <b>п. Донское</b> — ветер СЗ, З (высокий склон)</div>
+        <div class="sub">🌊 <b>п. Янтарный</b> — ветер ЮЗ, З (береговой бриз)</div>
+        <div class="sub">🚜 <b>Аэродром «Северный»</b> — лебёдка (любой ветер)</div>
+        <div class="sub">🪂 <b>п. Сокольники</b> — мотор / наземная подготовка</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО: СОЗДАНИЕ / РЕДАКТИРОВАНИЕ ПОЛЁТА -->
+<div id="modal-flight" class="modal-bg hide">
+  <div class="modal">
+    <div class="row">
+      <div class="title" id="mf-title">Новый выезд</div>
+      <button onclick="closeModals()" style="border:none;background:none;font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div class="field">Дата вылета<input id="mf-date" class="input" placeholder="Например: 28 ноября"></div>
+    <div class="field">Время<input id="mf-time" class="input" placeholder="10:00–14:00"></div>
+    <div class="field">Спот Калининградской обл.
+      <select id="mf-spot" class="input" onchange="checkWindHint()">
+        <option value="п. Куликово (Склон)">п. Куликово (Склон · С/СВ)</option>
+        <option value="п. Донское (Склон)">п. Донское (Склон · СЗ/З)</option>
+        <option value="п. Янтарный (Склон)">п. Янтарный (Склон · ЮЗ/З)</option>
+        <option value="Аэродром «Северный» (Лебёдка)">Аэродром «Северный» (Лебёдка)</option>
+        <option value="п. Сокольники (Поле)">п. Сокольники (Поле)</option>
+      </select>
+    </div>
+    <div class="field">Ветер<input id="mf-wind" class="input" value="💨 СВ 5–7 м/с" oninput="checkWindHint()"></div>
+    <div id="mf-wind-warn" class="warn-box hide"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
+      <input type="checkbox" id="mf-comp" onchange="updateDiscOptions()"> 🏆 Это соревнования
+    </label>
+    <div class="field">Дисциплина<select id="mf-disc" class="input"></select></div>
+    <div class="field">Инициатор (РП)<select id="mf-init" class="input"></select></div>
+    <div class="field">Лимит участников<input id="mf-limit" type="number" class="input" value="15"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#B91C1C;font-weight:600;cursor:pointer">
+      <input type="checkbox" id="mf-canceled"> Выезд отменён по погоде
+    </label>
+    <button class="btn" onclick="saveFlight()" style="width:100%">Сохранить</button>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО: КОРРЕКТИРОВКА ДАТЫ ВЫЛЕТА -->
+<div id="modal-shift" class="modal-bg hide">
+  <div class="modal">
+    <div class="row">
+      <div class="title">Корректировка даты вылета</div>
+      <button onclick="closeModals()" style="border:none;background:none;font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div class="sub" id="ms-old"></div>
+    <div class="field">Новая дата<input id="ms-date" class="input"></div>
+    <div class="field">Новое время<input id="ms-time" class="input"></div>
+    <div class="field">Причина переноса<input id="ms-reason" class="input" value="Сдвиг по прогнозу ветра"></div>
+    <button class="btn" onclick="applyDateShift()" style="width:100%">Применить перенос</button>
+  </div>
+</div>
+
+<!-- НИЖНЕЕ МЕНЮ -->
+<div class="nav">
+  <button class="active" onclick="go('home', this)"><span>🪂</span><span>Главная</span></button>
+  <button onclick="go('cal', this)"><span>📅</span><span>Календарь</span></button>
+  <button onclick="go('weather', this)"><span>💨</span><span>Погода</span></button>
+  <button onclick="go('pilots', this)"><span>👥</span><span>Участники</span></button>
+  <button onclick="go('profile', this)"><span>👤</span><span>Профиль</span></button>
+</div>
+
+<script>
+  var isRP = true;
+  var homeTab = "all";
+  var calFilter = "all";
+  var curId = 1;
+  var editId = null;
+
+  var me = {
+    id: 11, name: "Сергей Сухорученко", role: "Инструктор · РП", wing: "—",
+    district: "Калининградская область", car: false, seats: 0, borderPass: false,
+    phone: "", max: "", tg: "", color: "#2563EB"
+  };
+
+  // Публичный состав пилотов: имена сверены с сайтом KD Pilot и материалами ОФ СЛА.
+  // Контакты и личные характеристики не добавлены, если они не опубликованы.
+  var users = [
+    me,
+    { id: 1, name: "Антон Зотов", role: "Пилот-инструктор", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#059669" },
+    { id: 2, name: "Денис Богданов", role: "Пилот-инструктор", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#7C3AED" },
+    { id: 3, name: "Артём Сухорученко", role: "Пилот", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#D97706" },
+    { id: 4, name: "Татьяна Добрынина", role: "Пилот", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#DC2626" },
+    { id: 5, name: "Никита Шишин", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#0891B2" },
+    { id: 6, name: "Александр Носаль", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#0D9488" },
+    { id: 8, name: "Дмитрий Скляренко", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#C2410C" },
+    { id: 9, name: "Виталий Передереев", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#4F46E5" },
+    { id: 10, name: "Владимир Куарцев", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "", max: "", tg: "", color: "#0F766E" }
+  ];
+
+  var spotSectors = {
+    "п. Куликово (Склон)": ["С", "СВ"],
+    "п. Донское (Склон)": ["СЗ", "З"],
+    "п. Янтарный (Склон)": ["ЮЗ", "З"],
+    "Аэродром «Северный» (Лебёдка)": ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"],
+    "п. Сокольники (Поле)": ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"]
+  };
+
+  var flights = [
+    { id: 1, month: "Ноябрь 2026", date: "26 ноября", time: "10:00–14:00", spot: "п. Куликово (Склон)", wind: "💨 СВ 5–7 м/с", isComp: false, disc: "Динамик на склоне", initId: 1, limit: 15, canceled: false, shiftedFrom: "", shiftReason: "", g: [1, 11, 2, 3, 4], r: [5], b: [2, 4], rides: { 2: 1 } },
+    { id: 2, month: "Ноябрь 2026", date: "29 ноября", time: "09:30–13:30", spot: "Аэродром «Северный» (Лебёдка)", wind: "💨 Ю 3–4 м/с", isComp: false, disc: "Лебёдочные затяжки", initId: 5, limit: 12, canceled: false, shiftedFrom: "28 ноября", shiftReason: "Дождь в субботу", g: [5, 11, 3], r: [1], b: [4], rides: {} },
+    { id: 3, month: "Декабрь 2026", date: "5 декабря", time: "10:00–15:00", spot: "п. Донское (Склон)", wind: "💨 СЗ 6–8 м/с", isComp: true, disc: "Точность приземления", initId: 1, limit: 20, canceled: false, shiftedFrom: "", shiftReason: "", g: [1, 3, 5, 11], r: [], b: [2], rides: { 2: 3 } },
+    { id: 4, month: "Декабрь 2026", date: "12 декабря", time: "10:00–14:00", spot: "п. Сокольники (Поле)", wind: "💨 Штиль 1–2 м/с", isComp: false, disc: "Наземная подготовка", initId: 5, limit: 15, canceled: false, shiftedFrom: "", shiftReason: "", g: [5, 4], r: [], b: [], rides: {} },
+    { id: 5, month: "Декабрь 2026", date: "19 декабря", time: "10:00–15:00", spot: "п. Янтарный (Склон)", wind: "💨 ЮЗ 5–7 м/с", isComp: true, disc: "Маршрутная гонка (XC)", initId: 1, limit: 18, canceled: false, shiftedFrom: "20 декабря", shiftReason: "Рабочий бриз в субботу", g: [1, 11, 2, 3], r: [4], b: [5], rides: { 2: 11 } },
+    { id: 6, month: "Январь 2027", date: "4 января", time: "11:00–15:00", spot: "п. Куликово (Склон)", wind: "💨 С 6–7 м/с", isComp: false, disc: "Новогодний динамик", initId: 5, limit: 20, canceled: false, shiftedFrom: "", shiftReason: "", g: [5, 1, 11], r: [], b: [], rides: {} }
+  ];
+
+  function getUser(id) {
+    for (var i = 0; i < users.length; i++) if (users[i].id === id) return users[i];
+    return users[0];
+  }
+
+  function makeAvatar(u, lg) {
+    var s = document.createElement("span");
+    s.className = "av-init" + (lg ? " av-lg" : "");
+    s.style.background = u.color || "#2563EB";
+    s.textContent = u.name.charAt(0).toUpperCase();
+    return s;
+  }
+
+  function makeCommIcons(u) {
+    var box = document.createElement("div");
+    box.className = "comm-icons";
+    if (u.phone) { var a1 = document.createElement("a"); a1.className = "ico-btn ico-tel"; a1.href = "tel:" + u.phone; a1.textContent = "📞"; box.appendChild(a1); }
+    if (u.max) { var a2 = document.createElement("a"); a2.className = "ico-btn ico-max"; a2.href = "https://max.ru/" + u.max; a2.target = "_blank"; a2.rel = "noopener"; a2.textContent = "MAX"; box.appendChild(a2); }
+    if (u.tg) { var a3 = document.createElement("a"); a3.className = "ico-btn ico-tg"; a3.href = "https://t.me/" + u.tg; a3.target = "_blank"; a3.rel = "noopener"; a3.textContent = "TG"; box.appendChild(a3); }
+    return box;
+  }
+
+  function calcFreeSeats(f) {
+    var total = 0, used = 0;
+    for (var i = 0; i < f.g.length; i++) {
+      var u = getUser(f.g[i]);
+      if (u.car) total += (u.seats || 0);
+    }
+    for (var k in f.rides) if (f.rides.hasOwnProperty(k)) used++;
+    return Math.max(0, total - used);
+  }
+
+  function buildPill(arr, cls) {
+    var p = document.createElement("div");
+    if (!arr || !arr.length) return p;
+    p.className = "pill " + cls;
+    var avs = document.createElement("div"); avs.className = "avs";
+    var n = arr.length, vis = n === 1 ? 1 : 2, ext = n - vis;
+    for (var i = 0; i < vis; i++) avs.appendChild(makeAvatar(getUser(arr[i]), false));
+    if (ext > 0) {
+      var e = document.createElement("span"); e.className = "ext"; e.textContent = "+" + ext;
+      avs.appendChild(e);
+    }
+    var cnt = document.createElement("span"); cnt.textContent = String(n);
+    p.appendChild(avs); p.appendChild(cnt);
+    return p;
+  }
+
+  function buildFlightCard(f, isFeat) {
+    var c = document.createElement("div");
+    c.className = "card click" + (f.canceled ? " canceled" : "");
+    c.onclick = function() { openDetails(f.id); };
+
+    var top = document.createElement("div"); top.className = "row";
+    var left = document.createElement("div");
+    var t = document.createElement("div"); t.className = "title";
+    t.textContent = isFeat ? "Ближайший · " + f.date : f.date;
+    var sub = document.createElement("div"); sub.className = "sub";
+    sub.textContent = f.time + " · 📍 " + f.spot;
+    left.appendChild(t); left.appendChild(sub);
+    var arr = document.createElement("span"); arr.textContent = "›"; arr.style.fontSize = "20px"; arr.style.color = "#64748B";
+    top.appendChild(left); top.appendChild(arr);
+    c.appendChild(top);
+
+    var badges = document.createElement("div"); badges.className = "badges";
+    if (f.canceled) {
+      var bc = document.createElement("span"); bc.className = "badge b-canc"; bc.textContent = "✕ Отменён"; badges.appendChild(bc);
+    }
+    if (f.shiftedFrom) {
+      var bs = document.createElement("span"); bs.className = "badge b-shift"; bs.textContent = "📅 Перенесён с " + f.shiftedFrom; badges.appendChild(bs);
+    }
+    if (f.isComp) {
+      var bcomp = document.createElement("span"); bcomp.className = "badge b-comp"; bcomp.textContent = "🏆 Соревнования"; badges.appendChild(bcomp);
+    }
+    var bd = document.createElement("span"); bd.className = "badge b-disc"; bd.textContent = f.disc; badges.appendChild(bd);
+    var bw = document.createElement("span"); bw.className = "badge b-wind"; bw.textContent = f.wind; badges.appendChild(bw);
+    var bcar = document.createElement("span"); bcar.className = "badge b-car"; bcar.textContent = "🚗 Свободно мест: " + calcFreeSeats(f); badges.appendChild(bcar);
+    c.appendChild(badges);
+
+    var initU = getUser(f.initId);
+    var il = document.createElement("div"); il.className = "init-line";
+    il.appendChild(makeAvatar(initU, false));
+    var itxt = document.createElement("span"); itxt.textContent = "Инициатор (РП): " + initU.name;
+    il.appendChild(itxt);
+    c.appendChild(il);
+
+    var gr = document.createElement("div"); gr.className = "groups";
+    gr.appendChild(buildPill(f.g, "g-green"));
+    gr.appendChild(buildPill(f.r, "g-red"));
+    gr.appendChild(buildPill(f.b, "g-blue"));
+    c.appendChild(gr);
+
+    return c;
+  }
+
+  function renderHome() {
+    var feat = document.getElementById("featured"); feat.innerHTML = "";
+    if (flights.length) feat.appendChild(buildFlightCard(flights[0], true));
+
+    var list = document.getElementById("list"); list.innerHTML = "";
+    for (var i = 0; i < flights.length; i++) {
+      if (homeTab === "all" || flights[i].isComp) list.appendChild(buildFlightCard(flights[i], false));
+    }
+  }
+
+  function setHomeTab(t, btn) {
+    homeTab = t;
+    var tabs = document.querySelectorAll(".tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
+    btn.classList.add("active");
+    renderHome();
+  }
+
+  function renderCalendar() {
+    var list = document.getElementById("cal-list"); list.innerHTML = "";
+    var lastMonth = "";
+    for (var i = 0; i < flights.length; i++) {
+      var f = flights[i];
+      if (calFilter === "comp" && !f.isComp) continue;
+      if (calFilter === "shifted" && !f.shiftedFrom) continue;
+
+      if (f.month !== lastMonth) {
+        lastMonth = f.month;
+        var mh = document.createElement("div");
+        mh.style.fontWeight = "700"; mh.style.fontSize = "14px"; mh.style.color = "#2563EB"; mh.style.marginTop = "4px";
+        mh.textContent = lastMonth;
+        list.appendChild(mh);
+      }
+      list.appendChild(buildFlightCard(f, false));
+    }
+  }
+
+  function setCalFilter(flt, btn) {
+    calFilter = flt;
+    var chips = document.querySelectorAll("#cal-chips .chip");
+    for (var i = 0; i < chips.length; i++) chips[i].classList.remove("active");
+    btn.classList.add("active");
+    renderCalendar();
+  }
+
+  function openDetails(id) {
+    curId = id;
+    var f = flights[0];
+    for (var i = 0; i < flights.length; i++) if (flights[i].id === id) f = flights[i];
+
+    var act = document.getElementById("details-actions"); act.innerHTML = "";
+    if (isRP) {
+      var bShift = document.createElement("button"); bShift.className = "btn-warn"; bShift.textContent = "📅 Сдвинуть дату";
+      bShift.onclick = function() { openShiftModal(f); };
+      var bEdit = document.createElement("button"); bEdit.className = "btn-sm"; bEdit.textContent = "✏️ Изменить";
+      bEdit.onclick = function() { openFlightModal(f); };
+      act.appendChild(bShift); act.appendChild(bEdit);
+    }
+
+    var box = document.getElementById("details-box"); box.innerHTML = "";
+
+    // Сводка
+    var c1 = document.createElement("div"); c1.className = "card";
+    var t1 = document.createElement("div"); t1.className = "title"; t1.textContent = f.date + " · " + f.spot;
+    c1.appendChild(t1);
+    if (f.shiftedFrom) {
+      var sh = document.createElement("div"); sh.className = "warn-box";
+      sh.textContent = "📅 Дата скорректирована (было: " + f.shiftedFrom + "). Причина: " + f.shiftReason;
+      c1.appendChild(sh);
+    }
+    var b1 = document.createElement("div"); b1.className = "badges";
+    if (f.isComp) { var bc = document.createElement("span"); bc.className = "badge b-comp"; bc.textContent = "🏆 Соревнования"; b1.appendChild(bc); }
+    var bd = document.createElement("span"); bd.className = "badge b-disc"; bd.textContent = f.disc; b1.appendChild(bd);
+    var bw = document.createElement("span"); bw.className = "badge b-wind"; bw.textContent = f.wind; b1.appendChild(bw);
+    c1.appendChild(b1);
+    var s1 = document.createElement("div"); s1.className = "sub"; s1.textContent = "🕒 " + f.time + " · Лимит: " + f.g.length + "/" + f.limit + " чел.";
+    c1.appendChild(s1);
+    box.appendChild(c1);
+
+    // Статус участия
+    var c2 = document.createElement("div"); c2.className = "card";
+    var stLabel = document.createElement("div"); stLabel.className = "sub"; stLabel.style.fontWeight = "600"; stLabel.textContent = "Ваш статус на выезд:";
+    c2.appendChild(stLabel);
+    var grid = document.createElement("div"); grid.className = "st-grid";
+    var opts = [
+      { k: "g", t: "✓ Полечу", cls: "st-green" },
+      { k: "b", t: "? По погоде", cls: "st-blue" },
+      { k: "r", t: "✕ Не смогу", cls: "st-red" }
+    ];
+    for (var j = 0; j < opts.length; j++) {
+      (function(o) {
+        var b = document.createElement("button");
+        b.className = "st-btn" + (f[o.k].indexOf(me.id) !== -1 ? " " + o.cls : "");
+        b.textContent = o.t;
+        b.onclick = function() { setMyStatus(o.k); };
+        grid.appendChild(b);
+      })(opts[j]);
+    }
+    c2.appendChild(grid);
+    box.appendChild(c2);
+
+    // Экипажи из Калининграда (с кнопками Телефон, MAX, Telegram у каждого водителя!)
+    var cCar = document.createElement("div"); cCar.className = "card";
+    var carTitle = document.createElement("div"); carTitle.className = "title"; carTitle.style.fontSize = "15px";
+    carTitle.textContent = "🚗 Экипажи из Калининграда (свободно мест: " + calcFreeSeats(f) + ")";
+    cCar.appendChild(carTitle);
+
+    var driversCount = 0;
+    for (var d = 0; d < f.g.length; d++) {
+      var drv = getUser(f.g[d]);
+      if (drv.car && drv.seats > 0) {
+        driversCount++;
+        var taken = 0;
+        for (var rk in f.rides) if (f.rides.hasOwnProperty(rk) && f.rides[rk] === drv.id) taken++;
+        var free = Math.max(0, drv.seats - taken);
+
+        var drRow = document.createElement("div"); drRow.className = "p-row";
+        var drLeft = document.createElement("div"); drLeft.className = "p-left";
+        drLeft.appendChild(makeAvatar(drv, false));
+        var drInfo = document.createElement("div");
+        drInfo.innerHTML = "<b>" + drv.name + "</b><div class='sub'>Район: " + drv.district + " · Мест: " + free + " из " + drv.seats + "</div>";
+        drLeft.appendChild(drInfo);
+        drRow.appendChild(drLeft);
+
+        var drRight = document.createElement("div");
+        drRight.style.display = "flex"; drRight.style.alignItems = "center"; drRight.style.gap = "6px";
+        drRight.appendChild(makeCommIcons(drv));
+
+        if (drv.id !== me.id && f.g.indexOf(me.id) !== -1 && !me.car) {
+          var bookBtn = document.createElement("button");
+          bookBtn.className = f.rides[me.id] === drv.id ? "btn-warn" : "btn-sm";
+          bookBtn.textContent = f.rides[me.id] === drv.id ? "✓ Вы в экипаже" : (free > 0 ? "Занять место" : "Мест нет");
+          bookBtn.onclick = (function(driverId, freeSeats) {
+            return function() {
+              if (f.rides[me.id] === driverId) delete f.rides[me.id];
+              else if (freeSeats > 0) f.rides[me.id] = driverId;
+              openDetails(curId); renderHome();
+            };
+          })(drv.id, free);
+          drRight.appendChild(bookBtn);
+        }
+        drRow.appendChild(drRight);
+        cCar.appendChild(drRow);
+      }
+    }
+    if (!driversCount) {
+      var noDrv = document.createElement("div"); noDrv.className = "sub"; noDrv.textContent = "Пока нет водителей в зелёной группе.";
+      cCar.appendChild(noDrv);
+    }
+    box.appendChild(cCar);
+
+    // Список участников
+    var c3 = document.createElement("div"); c3.className = "card";
+    var t3 = document.createElement("div"); t3.className = "title"; t3.style.fontSize = "15px"; t3.style.color = "#15803D";
+    t3.textContent = "Подтвердили выезд (" + f.g.length + ")";
+    c3.appendChild(t3);
+
+    for (var p = 0; p < f.g.length; p++) {
+      var u = getUser(f.g[p]);
+      var row = document.createElement("div"); row.className = "p-row";
+      var left = document.createElement("div"); left.className = "p-left";
+      left.appendChild(makeAvatar(u, true));
+      var info = document.createElement("div");
+      var badgeInit = u.id === f.initId ? " <span class='badge b-comp'>РП</span>" : "";
+      info.innerHTML = "<b>" + u.name + "</b>" + badgeInit + "<div class='sub'>" + u.role + " · " + u.wing + "</div>";
+      left.appendChild(info);
+      row.appendChild(left);
+      row.appendChild(makeCommIcons(u));
+      c3.appendChild(row);
+    }
+    box.appendChild(c3);
+
+    go("details");
+  }
+
+  function setMyStatus(k) {
+    var f = flights[0];
+    for (var i = 0; i < flights.length; i++) if (flights[i].id === curId) f = flights[i];
+    f.g = f.g.filter(function(x) { return x !== me.id; });
+    f.b = f.b.filter(function(x) { return x !== me.id; });
+    f.r = f.r.filter(function(x) { return x !== me.id; });
+    if (k !== "g") delete f.rides[me.id];
+    if (k === "g" && f.g.length >= f.limit) {
+      alert("Лимит мест заполнен! Вы добавлены в синий лист ожидания.");
+      f.b.unshift(me.id);
+    } else {
+      f[k].unshift(me.id);
+    }
+    openDetails(curId); renderHome(); renderCalendar();
+  }
+
+  // Модалки создания, редактирования и сдвига даты
+  function updateDiscOptions(selectedVal) {
+    var isC = document.getElementById("mf-comp").checked;
+    var sel = document.getElementById("mf-disc"); sel.innerHTML = "";
+    var list = isC ? ["Точность приземления", "Маршрутная гонка (XC)", "Скоростной треугольник"] : ["Динамик на склоне", "Лебёдочные затяжки", "Наземная подготовка", "Парамотор"];
+    for (var i = 0; i < list.length; i++) {
+      var o = document.createElement("option"); o.value = list[i]; o.textContent = list[i];
+      if (selectedVal === list[i]) o.selected = true;
+      sel.appendChild(o);
+    }
+  }
+
+  function checkWindHint() {
+    var spot = document.getElementById("mf-spot").value;
+    var wind = document.getElementById("mf-wind").value.toUpperCase();
+    var warn = document.getElementById("mf-wind-warn");
+    var dir = "";
+    var dirs = ["СЗ", "СВ", "ЮЗ", "ЮВ", "С", "Ю", "З", "В"];
+    for (var i = 0; i < dirs.length; i++) if (wind.indexOf(dirs[i]) !== -1) { dir = dirs[i]; break; }
+    var allowed = spotSectors[spot] || [];
+    if (dir && allowed.indexOf(dir) === -1) {
+      warn.classList.remove("hide");
+      warn.textContent = "⚠️ Ветер (" + dir + ") не подходит для «" + spot + "». Рабочий сектор: " + allowed.join(", ");
+    } else {
+      warn.classList.add("hide");
+    }
+  }
+
+  function openFlightModal(f) {
+    editId = f ? f.id : null;
+    document.getElementById("mf-title").textContent = f ? "Редактировать полёт" : "Новый выезд";
+    document.getElementById("mf-date").value = f ? f.date : "28 ноября";
+    document.getElementById("mf-time").value = f ? f.time : "10:00–14:00";
+    document.getElementById("mf-spot").value = f ? f.spot : "п. Куликово (Склон)";
+    document.getElementById("mf-wind").value = f ? f.wind : "💨 СВ 5–7 м/с";
+    document.getElementById("mf-comp").checked = f ? f.isComp : false;
+    document.getElementById("mf-limit").value = f ? f.limit : 15;
+    document.getElementById("mf-canceled").checked = f ? f.canceled : false;
+    updateDiscOptions(f ? f.disc : null);
+
+    var initSel = document.getElementById("mf-init"); initSel.innerHTML = "";
+    for (var i = 0; i < users.length; i++) {
+      var o = document.createElement("option"); o.value = users[i].id; o.textContent = users[i].name;
+      if (f && f.initId === users[i].id) o.selected = true;
+      initSel.appendChild(o);
+    }
+    checkWindHint();
+    document.getElementById("modal-flight").classList.remove("hide");
+  }
+
+  function saveFlight() {
+    var initId = parseInt(document.getElementById("mf-init").value, 10) || me.id;
+    var data = {
+      date: document.getElementById("mf-date").value,
+      time: document.getElementById("mf-time").value,
+      spot: document.getElementById("mf-spot").value,
+      wind: document.getElementById("mf-wind").value,
+      isComp: document.getElementById("mf-comp").checked,
+      disc: document.getElementById("mf-disc").value,
+      initId: initId,
+      limit: parseInt(document.getElementById("mf-limit").value, 10) || 15,
+      canceled: document.getElementById("mf-canceled").checked
+    };
+    if (editId) {
+      for (var i = 0; i < flights.length; i++) {
+        if (flights[i].id === editId) {
+          for (var k in data) flights[i][k] = data[k];
+        }
+      }
+      closeModals(); openDetails(editId); renderHome(); renderCalendar();
+    } else {
+      data.id = Date.now();
+      data.month = "Ноябрь 2026";
+      data.shiftedFrom = ""; data.shiftReason = "";
+      data.g = [initId]; data.r = []; data.b = []; data.rides = {};
+      flights.unshift(data);
+      closeModals(); renderHome(); renderCalendar();
+    }
+  }
+
+  function openShiftModal(f) {
+    editId = f.id;
+    document.getElementById("ms-old").textContent = "Текущая дата: " + f.date + " (" + f.time + ")";
+    document.getElementById("ms-date").value = f.date;
+    document.getElementById("ms-time").value = f.time;
+    document.getElementById("modal-shift").classList.remove("hide");
+  }
+
+  function applyDateShift() {
+    for (var i = 0; i < flights.length; i++) {
+      if (flights[i].id === editId) {
+        if (!flights[i].shiftedFrom) flights[i].shiftedFrom = flights[i].date;
+        flights[i].date = document.getElementById("ms-date").value;
+        flights[i].time = document.getElementById("ms-time").value;
+        flights[i].shiftReason = document.getElementById("ms-reason").value;
+      }
+    }
+    closeModals(); openDetails(editId); renderHome(); renderCalendar();
+  }
+
+  function closeModals() {
+    document.getElementById("modal-flight").classList.add("hide");
+    document.getElementById("modal-shift").classList.add("hide");
+  }
+
+  function toggleRole() {
+    isRP = !isRP;
+    var btn = document.getElementById("role-btn");
+    btn.textContent = isRP ? "Режим: РП" : "Режим: Пилот";
+    btn.className = "role-pill" + (isRP ? " rp" : "");
+    document.getElementById("create-btn").classList.toggle("hide", !isRP);
+    document.getElementById("cal-add-btn").classList.toggle("hide", !isRP);
+  }
+
+  function renderPilots() {
+    var box = document.getElementById("pilots-box"); box.innerHTML = "";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      var row = document.createElement("div"); row.className = "p-row";
+      var left = document.createElement("div"); left.className = "p-left";
+      left.appendChild(makeAvatar(u, true));
+      var info = document.createElement("div");
+      info.innerHTML = "<b>" + u.name + "</b><div class='sub'>" + u.role + " · " + u.wing + (u.car ? " · 🚗 +" + u.seats : "") + "</div>";
+      left.appendChild(info);
+      row.appendChild(left);
+      row.appendChild(makeCommIcons(u));
+      box.appendChild(row);
+    }
+  }
+
+  function renderProfile() {
+    var box = document.getElementById("profile-box"); box.innerHTML = "";
+    var head = document.createElement("div"); head.className = "p-left";
+    head.appendChild(makeAvatar(me, true));
+    var hInfo = document.createElement("div");
+    hInfo.innerHTML = "<b>" + me.name + "</b><div class='sub'>" + me.role + " · Крыло: " + me.wing + "</div>";
+    head.appendChild(hInfo);
+    box.appendChild(head);
+
+    var f1 = document.createElement("div"); f1.className = "field";
+    f1.innerHTML = "Имя<input id='pr-name' class='input' value='" + me.name + "'>";
+    var f2 = document.createElement("div"); f2.className = "field";
+    f2.innerHTML = "Крыло<input id='pr-wing' class='input' value='" + me.wing + "'>";
+    var f3 = document.createElement("div"); f3.className = "field";
+    f3.innerHTML = "Район выезда (Калининград)<input id='pr-dist' class='input' value='" + me.district + "'>";
+
+    var chkCar = document.createElement("label");
+    chkCar.style.display = "flex"; chkCar.style.alignItems = "center"; chkCar.style.gap = "8px"; chkCar.style.fontSize = "13px";
+    chkCar.innerHTML = "<input type='checkbox' id='pr-car' " + (me.car ? "checked" : "") + "> Еду на своей машине (+2 места)";
+
+    var chkPass = document.createElement("label");
+    chkPass.style.display = "flex"; chkPass.style.alignItems = "center"; chkPass.style.gap = "8px"; chkPass.style.fontSize = "13px";
+    chkPass.innerHTML = "<input type='checkbox' id='pr-pass' " + (me.borderPass ? "checked" : "") + "> Есть погранпропуск (Балтийская коса)";
+
+    var saveBtn = document.createElement("button"); saveBtn.className = "btn"; saveBtn.textContent = "Сохранить профиль";
+    saveBtn.onclick = function() {
+      me.name = document.getElementById("pr-name").value;
+      me.wing = document.getElementById("pr-wing").value;
+      me.district = document.getElementById("pr-dist").value;
+      me.car = document.getElementById("pr-car").checked;
+      me.seats = me.car ? 2 : 0;
+      me.borderPass = document.getElementById("pr-pass").checked;
+      renderProfile(); renderPilots(); renderHome();
+      alert("Профиль обновлён!");
+    };
+
+    box.appendChild(f1); box.appendChild(f2); box.appendChild(f3);
+    box.appendChild(chkCar); box.appendChild(chkPass); box.appendChild(saveBtn);
+  }
+
+  // Погода: актуальные данные Open-Meteo для каждого спота.
+  var weatherLoaded = false;
+  var weatherLoading = false;
+  var weatherSpots = [
+    { name: "п. Куликово", sector: ["С", "СВ"], lat: 54.96, lon: 20.35 },
+    { name: "п. Донское", sector: ["СЗ", "З"], lat: 54.95, lon: 20.65 },
+    { name: "п. Янтарный", sector: ["ЮЗ", "З"], lat: 54.87, lon: 19.94 },
+    { name: "Аэродром Северный", sector: ["Лебёдка · любой ветер"], lat: 54.89, lon: 20.59 },
+    { name: "п. Сокольники", sector: ["Поле · любой ветер"], lat: 54.75, lon: 20.30 }
+  ];
+
+  function windDirection(degrees) {
+    var dirs = ["С","СВ","В","ЮВ","Ю","ЮЗ","З","СЗ"];
+    return dirs[Math.round(Number(degrees) / 45) % 8];
+  }
+  function weatherDate(value) {
+    var d = new Date(value + "T12:00:00");
+    return d.toLocaleDateString("ru-RU", { weekday:"short", day:"numeric", month:"short" });
+  }
+  function weatherNumber(value) {
+    return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value))
+      ? Math.round(Number(value)) : "—";
+  }
+  function weatherCard(spot, data) {
+    var card = document.createElement("div");
+    card.className = "card weather-spot";
+    var title = document.createElement("div");
+    title.className = "title";
+    title.style.fontSize = "15px";
+    title.textContent = spot.name;
+    card.appendChild(title);
+    var sector = document.createElement("div");
+    sector.className = "sub";
+    sector.textContent = "Рабочий сектор: " + spot.sector.join(", ");
+    card.appendChild(sector);
+
+    var current = document.createElement("div");
+    current.className = "weather-current";
+    var cw = data.current || {};
+    current.textContent = "Сейчас: " + weatherNumber(cw.temperature_2m) + " °C · ветер " +
+      weatherNumber(cw.wind_speed_10m) + " м/с " + windDirection(cw.wind_direction_10m) +
+      (cw.precipitation != null ? " · осадки " + cw.precipitation + " мм" : "");
+    card.appendChild(current);
+
+    var grid = document.createElement("div");
+    grid.className = "weather-grid";
+    var daily = data.daily || {};
+    var count = Math.min((daily.time || []).length, 3);
+    for (var i = 0; i < count; i++) {
+      var direction = windDirection(daily.wind_direction_10m_dominant[i]);
+      var speed = weatherNumber(daily.wind_speed_10m_max[i]);
+      var isAnyWind = spot.name.indexOf("Аэродром") === 0 || spot.name.indexOf("Сокольники") === 0;
+      var suitable = isAnyWind || spot.sector.indexOf(direction) !== -1;
+      var day = document.createElement("div");
+      day.className = "weather-day";
+      var label = document.createElement("strong");
+      label.textContent = weatherDate(daily.time[i]);
+      var wind = document.createElement("div");
+      wind.textContent = direction + " · до " + speed + " м/с";
+      wind.className = suitable ? "weather-good" : "weather-bad";
+      var temp = document.createElement("div");
+      temp.textContent = "🌡 " + weatherNumber(daily.temperature_2m_min[i]) + "… " +
+        weatherNumber(daily.temperature_2m_max[i]) + " °C";
+      var rain = document.createElement("div");
+      rain.textContent = "☔ " + weatherNumber(daily.precipitation_probability_max[i]) + "% осадков";
+      var verdict = document.createElement("div");
+      verdict.className = suitable ? "weather-good" : "weather-bad";
+      verdict.textContent = suitable ? "✓ По направлению подходит" : "Не рабочий сектор";
+      day.appendChild(label); day.appendChild(wind); day.appendChild(temp);
+      day.appendChild(rain); day.appendChild(verdict);
+      grid.appendChild(day);
+    }
+    card.appendChild(grid);
+    return card;
+  }
+
+  async function loadWeather(force) {
+    if (weatherLoading || (weatherLoaded && !force)) return;
+    weatherLoading = true;
+    var refresh = document.getElementById("weather-refresh");
+    var status = document.getElementById("weather-updated");
+    var currentBox = document.getElementById("weather-current");
+    var spotsBox = document.getElementById("weather-spots");
+    if (refresh) { refresh.disabled = true; refresh.textContent = "Загрузка…"; }
+    if (status) status.textContent = "Обновляем прогноз…";
+    try {
+      var lat = weatherSpots.map(function(x) { return x.lat; }).join(",");
+      var lon = weatherSpots.map(function(x) { return x.lon; }).join(",");
+      var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat +
+        "&longitude=" + lon +
+        "&current=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation" +
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant" +
+        "&forecast_days=3&wind_speed_unit=ms&timezone=Europe%2FKaliningrad";
+      var response = await fetch(url);
+      if (!response.ok) throw new Error("Сервис погоды ответил: " + response.status);
+      var result = await response.json();
+      var data = Array.isArray(result) ? result : [result];
+      if (!data.length || !data[0].daily) throw new Error("Сервис не вернул прогноз");
+      currentBox.innerHTML = "";
+      var title = document.createElement("div");
+      title.className = "title"; title.style.fontSize = "15px";
+      title.textContent = "Текущие условия · Калининградская область";
+      currentBox.appendChild(title);
+      var summary = document.createElement("div");
+      summary.className = "weather-current";
+      var first = data[0].current || {};
+      summary.textContent = "Калининград: " + weatherNumber(first.temperature_2m) + " °C · ветер " +
+        weatherNumber(first.wind_speed_10m) + " м/с " + windDirection(first.wind_direction_10m);
+      currentBox.appendChild(summary);
+      spotsBox.innerHTML = "";
+      for (var i = 0; i < weatherSpots.length; i++) {
+        if (data[i]) spotsBox.appendChild(weatherCard(weatherSpots[i], data[i]));
+      }
+      weatherLoaded = true;
+      if (status) status.textContent = "Обновлено: " + new Date().toLocaleString("ru-RU");
+    } catch (error) {
+      if (status) status.textContent = "Не удалось обновить прогноз";
+      if (currentBox) currentBox.innerHTML =
+        '<div class="title" style="font-size:15px">Погода временно недоступна</div>' +
+        '<div class="weather-error">Проверьте подключение к интернету и нажмите «Обновить». ' +
+        'Последние данные не подменяются вымышленными значениями.</div>';
+      if (spotsBox && !spotsBox.children.length) spotsBox.innerHTML = "";
+    } finally {
+      weatherLoading = false;
+      if (refresh) { refresh.disabled = false; refresh.textContent = "↻ Обновить"; }
+    }
+  }
+
+  function go(sec, btn) {
+    var screens = document.querySelectorAll(".screen");
+    for (var i = 0; i < screens.length; i++) screens[i].classList.add("hide");
+    document.getElementById("v-" + sec).classList.remove("hide");
+    if (sec === "weather") loadWeather(false);
+    if (btn) {
+      var btns = document.querySelectorAll(".nav button");
+      for (var j = 0; j < btns.length; j++) btns[j].classList.remove("active");
+      btn.classList.add("active");
+    }
+  }
+
+  renderHome();
+  renderCalendar();
+  renderPilots();
+  renderProfile();
+</script>
+</body>
+</html>
