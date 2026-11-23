@@ -80,6 +80,14 @@
   .comm-icons { display: flex; align-items: center; gap: 5px; }
   .wing-line { margin-top: 2px; }
   .wing-link { border: 0; padding: 0; background: none; color: #2563EB; font: inherit; text-decoration: underline; cursor: pointer; }
+  .wing-modal { gap: 10px; }
+  .wing-brand { color:#64748B; font-size:11px; font-weight:800; letter-spacing:1px; }
+  .wing-section-title { font-size:13px; font-weight:800; color:#0F172A; margin-top:4px; }
+  .wing-spec-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .wing-spec { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:9px; padding:8px; min-width:0; }
+  .wing-spec span { display:block; color:#64748B; font-size:10px; margin-bottom:3px; }
+  .wing-spec b { display:block; color:#0F172A; font-size:12px; overflow-wrap:anywhere; }
+
   .ico-btn { text-decoration: none; font-size: 11px; font-weight: 700; padding: 4px 7px; border-radius: 7px; display: inline-flex; align-items: center; gap: 2px; }
   .ico-tel { background: #DCFCE7; color: #15803D; }
   .ico-max { background: #F3E8FF; color: #6B21A8; }
@@ -289,6 +297,24 @@
     { id: 9, name: "Виталий Передереев", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "+79000000010", max: "demo_user_10", tg: "demo_user_10", color: "#4F46E5" },
     { id: 10, name: "Владимир Куарцев", role: "Спортсмен", wing: "—", district: "Калининградская область", car: false, seats: 0, phone: "+79000000011", max: "demo_user_11", tg: "demo_user_11", color: "#0F766E" }
   ];
+
+  // Демонстрационные модели и показатели. Все числовые значения ниже — тестовые, не паспортные данные.
+  var demoWingSpecs = {
+    "Ozone Buzz Z7": { brand:"Ozone", klass:"EN-B", area:"24–28 м²", span:"11,2 м", aspect:"5,3", cells:"55", load:"75–105 кг", weight:"4,6 кг", speed:"22–50 км/ч", glide:"около 9,5", flights:86, hours:42.5, year:2024, condition:"Хорошее", inspection:"15.09.2026" },
+    "Advance Alpha 7": { brand:"ADVANCE", klass:"EN-A", area:"22–26 м²", span:"10,4 м", aspect:"4,8", cells:"38", load:"65–95 кг", weight:"4,2 кг", speed:"21–43 км/ч", glide:"около 8,5", flights:54, hours:28.0, year:2023, condition:"Отличное", inspection:"02.10.2026" },
+    "Skywalk Mescal 6": { brand:"SKYWALK", klass:"EN-A", area:"23–27 м²", span:"10,7 м", aspect:"4,9", cells:"40", load:"70–100 кг", weight:"4,4 кг", speed:"21–44 км/ч", glide:"около 8,7", flights:112, hours:61.0, year:2022, condition:"Хорошее", inspection:"20.08.2026" },
+    "Gin Explorer 2": { brand:"GIN", klass:"EN-B", area:"24–28 м²", span:"11,5 м", aspect:"5,5", cells:"58", load:"75–105 кг", weight:"4,8 кг", speed:"22–51 км/ч", glide:"около 9,8", flights:137, hours:78.5, year:2024, condition:"Хорошее", inspection:"11.10.2026" },
+    "Nova Ion 6": { brand:"NOVA", klass:"EN-B", area:"23–27 м²", span:"11,3 м", aspect:"5,4", cells:"51", load:"70–100 кг", weight:"4,5 кг", speed:"22–49 км/ч", glide:"около 9,6", flights:93, hours:49.0, year:2023, condition:"Хорошее", inspection:"05.07.2026" },
+    "BGD Epic 2": { brand:"BGD", klass:"EN-B", area:"24–28 м²", span:"11,4 м", aspect:"5,4", cells:"55", load:"75–105 кг", weight:"4,7 кг", speed:"22–50 км/ч", glide:"около 9,4", flights:68, hours:35.5, year:2025, condition:"Отличное", inspection:"18.10.2026" },
+    "Ozone Rush 6": { brand:"Ozone", klass:"EN-B", area:"23–27 м²", span:"11,6 м", aspect:"5,6", cells:"57", load:"70–100 кг", weight:"4,6 кг", speed:"22–52 км/ч", glide:"около 10", flights:154, hours:91.0, year:2022, condition:"Требует осмотра", inspection:"12.06.2026" },
+    "Advance Epsilon 9": { brand:"ADVANCE", klass:"EN-B", area:"24–28 м²", span:"11,5 м", aspect:"5,5", cells:"57", load:"75–105 кг", weight:"4,7 кг", speed:"22–50 км/ч", glide:"около 9,7", flights:76, hours:39.0, year:2024, condition:"Хорошее", inspection:"28.09.2026" },
+    "Niviuk Hook 6": { brand:"NIVIUK", klass:"EN-B", area:"23–27 м²", span:"11,2 м", aspect:"5,3", cells:"не указано", load:"70–100 кг", weight:"4,5 кг", speed:"22–49 км/ч", glide:"около 9,5", flights:121, hours:67.0, year:2023, condition:"Хорошее", inspection:"09.09.2026" },
+    "Skywalk Chili 5": { brand:"SKYWALK", klass:"EN-B", area:"24–28 м²", span:"11,7 м", aspect:"5,6", cells:"не указано", load:"75–105 кг", weight:"4,8 кг", speed:"22–51 км/ч", glide:"около 9,8", flights:103, hours:56.0, year:2024, condition:"Хорошее", inspection:"22.08.2026" }
+  };
+  var demoWingOwners = ["Ozone Buzz Z7","Advance Alpha 7","Skywalk Mescal 6","Gin Explorer 2","Nova Ion 6","BGD Epic 2","Ozone Rush 6","Advance Epsilon 9","Niviuk Hook 6","Skywalk Chili 5"];
+  for (var wi = 0; wi < users.length; wi++) {
+    users[wi].wing = demoWingOwners[wi % demoWingOwners.length];
+  }
 
   var spotSectors = {
     "п. Куликово (Склон)": ["С", "СВ"],
@@ -724,9 +750,7 @@
         wingLink.type = "button";
         wingLink.className = "wing-link";
         wingLink.textContent = u.wing;
-        wingLink.onclick = (function(wing) { return function() {
-          alert("Характеристики крыла: " + wing + "\n\nТехнические данные будут добавлены после указания точной модели и модификации.");
-        }; })(u.wing);
+        wingLink.onclick = (function(wing) { return function() { openWingDetails(wing); }; })(u.wing);
         wingLine.appendChild(wingLink);
       } else {
         wingLine.appendChild(document.createTextNode("не указано"));
@@ -739,6 +763,49 @@
       row.appendChild(left);
       box.appendChild(row);
     }
+  }
+
+  function openWingDetails(wing) {
+    var d = demoWingSpecs[wing];
+    if (!d) return;
+    var old = document.getElementById("wing-detail-modal");
+    if (old) old.remove();
+    var bg = document.createElement("div");
+    bg.id = "wing-detail-modal";
+    bg.className = "modal-bg";
+    var modal = document.createElement("div");
+    modal.className = "modal wing-modal";
+    var title = document.createElement("div");
+    title.innerHTML = "<div class='wing-brand'>" + d.brand + "</div><h2 style='margin:2px 0 0'>" + wing + "</h2><div class='sub'>Класс " + d.klass + "</div>";
+    modal.appendChild(title);
+    var note = document.createElement("div");
+    note.className = "warn-box";
+    note.textContent = "ДЕМО-РЕЖИМ: характеристики и статистика условные, добавлены для проверки интерфейса. Не использовать для подбора крыла или оценки его безопасности.";
+    modal.appendChild(note);
+    function section(label, rows) {
+      var h = document.createElement("div"); h.className = "wing-section-title"; h.textContent = label; modal.appendChild(h);
+      var grid = document.createElement("div"); grid.className = "wing-spec-grid";
+      for (var i = 0; i < rows.length; i++) {
+        var cell = document.createElement("div"); cell.className = "wing-spec";
+        cell.innerHTML = "<span>" + rows[i][0] + "</span><b>" + rows[i][1] + "</b>";
+        grid.appendChild(cell);
+      }
+      modal.appendChild(grid);
+    }
+    section("Технические характеристики", [
+      ["Площадь",d.area],["Размах",d.span],["Удлинение",d.aspect],["Количество секций",d.cells],
+      ["Полётный вес",d.load],["Вес крыла",d.weight],["Скорость",d.speed],["Аэродинамическое качество",d.glide]
+    ]);
+    section("Статистика эксплуатации", [
+      ["Год выпуска",String(d.year)],["Количество полётов",String(d.flights)],["Налёт",d.hours.toFixed(1)+" ч"],
+      ["Состояние",d.condition],["Последняя проверка",d.inspection],["Сертификация",d.klass]
+    ]);
+    var close = document.createElement("button"); close.className = "btn"; close.textContent = "Закрыть";
+    close.onclick = function() { bg.remove(); };
+    modal.appendChild(close);
+    bg.appendChild(modal);
+    bg.onclick = function(e) { if (e.target === bg) bg.remove(); };
+    document.body.appendChild(bg);
   }
 
   function renderProfile() {
