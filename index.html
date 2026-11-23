@@ -1133,7 +1133,7 @@
             daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant",
             forecast_days: "16",
             wind_speed_unit: "ms",
-            timezone: "Europe%2FKaliningrad"
+            timezone: "Europe/Kaliningrad"
           });
           var response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString());
           if (!response.ok) throw new Error("HTTP " + response.status);
