@@ -33,6 +33,7 @@
   .title { font-size: 17px; font-weight: 600; }
   .sub { font-size: 13px; color: #475569; }
   .badges { display: flex; flex-wrap: wrap; gap: 5px; }
+  .radio-line { display:flex; align-items:center; gap:6px; width:fit-content; padding:5px 9px; border-radius:8px; background:#E0F2FE; color:#0369A1; font-size:12px; font-weight:700; }
   .badge { font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 6px; background: #F1F5F9; color: #334155; }
   .b-wind { background: #DCFCE7; color: #15803D; }
   .b-disc { background: #F3E8FF; color: #7E22CE; }
@@ -248,7 +249,6 @@
       </select>
     </div>
     <div class="field">Ветер<input id="mf-wind" class="input" value="💨 СВ 5–7 м/с" oninput="checkWindHint()"></div>
-    <div class="field">Частоты рации<input id="mf-radio" class="input" placeholder="Например: 500.000 / 455.000"></div>
     <div id="mf-wind-warn" class="warn-box hide"></div>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
       <input type="checkbox" id="mf-comp" onchange="updateDiscOptions()"> 🏆 Это соревнования
@@ -288,6 +288,7 @@
 </div>
 
 <script>
+  var RADIO_FREQUENCIES = "500.000 / 455.000 МГц";
   var isRP = true;
   var homeTab = "all";
   var calFilter = "all";
@@ -480,7 +481,6 @@
     }
     var bd = document.createElement("span"); bd.className = "badge b-disc"; bd.textContent = f.disc; badges.appendChild(bd);
     var bw = document.createElement("span"); bw.className = "badge b-wind"; bw.textContent = f.wind; badges.appendChild(bw);
-    if (f.radio) { var br = document.createElement("span"); br.className = "badge"; br.textContent = "📻 " + f.radio; badges.appendChild(br); }
     var bcar = document.createElement("span"); bcar.className = "badge b-car"; bcar.textContent = "🚗 Свободно мест: " + calcFreeSeats(f); badges.appendChild(bcar);
     if (isFeat && f.spot) {
       var locationLink = document.createElement("a");
@@ -495,6 +495,8 @@
       badges.appendChild(locationLink);
     }
     c.appendChild(badges);
+    var radioLine = document.createElement("div"); radioLine.className = "radio-line";
+    radioLine.textContent = "📻 Рация: " + RADIO_FREQUENCIES; c.appendChild(radioLine);
 
     var initU = getUser(f.initId);
     var il = document.createElement("div");
@@ -614,6 +616,8 @@
     var bd = document.createElement("span"); bd.className = "badge b-disc"; bd.textContent = f.disc; b1.appendChild(bd);
     var bw = document.createElement("span"); bw.className = "badge b-wind"; bw.textContent = f.wind; b1.appendChild(bw);
     c1.appendChild(b1);
+    var radioLine = document.createElement("div"); radioLine.className = "radio-line";
+    radioLine.textContent = "📻 Рация: " + RADIO_FREQUENCIES; c1.appendChild(radioLine);
     var s1 = document.createElement("div"); s1.className = "sub"; s1.textContent = "🕒 " + f.time + " · Лимит: " + f.g.length + "/" + f.limit + " чел.";
     c1.appendChild(s1);
     box.appendChild(c1);
@@ -807,7 +811,6 @@
     document.getElementById("mf-time").value = f ? f.time : "10:00–14:00";
     document.getElementById("mf-spot").value = f ? f.spot : "п. Куликово (Склон)";
     document.getElementById("mf-wind").value = f ? f.wind : "💨 СВ 5–7 м/с";
-    document.getElementById("mf-radio").value = f ? (f.radio || "") : "";
     document.getElementById("mf-comp").checked = f ? f.isComp : false;
     document.getElementById("mf-limit").value = f ? f.limit : 15;
     document.getElementById("mf-canceled").checked = f ? f.canceled : false;
@@ -830,7 +833,6 @@
       time: document.getElementById("mf-time").value,
       spot: document.getElementById("mf-spot").value,
       wind: document.getElementById("mf-wind").value,
-      radio: document.getElementById("mf-radio").value.trim(),
       isComp: document.getElementById("mf-comp").checked,
       disc: document.getElementById("mf-disc").value,
       initId: initId,
