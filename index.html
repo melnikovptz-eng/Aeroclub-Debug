@@ -110,10 +110,10 @@
   .weather-spot { gap:8px; }
   .weather-current { font-size:13px; color:#334155; }
   .weather-loading { color:#64748B; font-size:13px; padding:12px 0; }
-  .flight-weather { background:#fff; border:1px solid #E2E8F0; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.03); }
-  .flight-weather-title { font-size:14px; font-weight:700; color:#0F172A; }
-  .flight-weather-values { background:#F8FAFC; border:1px solid #E2E8F0; border-radius:9px; padding:9px; font-size:13px; line-height:1.7; color:#0F172A; }
-  .flight-weather-note { font-size:11px; color:#475569; }
+  .flight-weather { background:transparent; border:0; border-radius:0; padding:0; display:flex; flex-direction:column; gap:5px; box-shadow:none; }
+  .flight-weather-title { display:none; }
+  .flight-weather-values { background:#F1F5F9; border:1px solid #E2E8F0; border-radius:9px; padding:9px 10px; font-size:12px; line-height:1.6; color:#0F172A; }
+  .flight-weather-note { font-size:11px; color:#475569; padding:0 2px; }
   @media (max-width:360px) { .weather-grid { grid-template-columns:1fr; } }
 
   /* Формы и модалка */
@@ -1092,7 +1092,7 @@
     var title = document.createElement("div");
     title.className = "flight-weather-title";
     title.textContent = "🌤 Погода на время полёта";
-    box.appendChild(title);
+    // Заголовок «Погода на время полёта» не показываем — оставляем только компактный блок прогноза.
     var values = document.createElement("div");
     values.className = "flight-weather-values";
     var note = document.createElement("div");
