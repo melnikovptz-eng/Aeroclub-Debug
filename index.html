@@ -334,13 +334,22 @@
     imageSource:"https://altair-aero.ru/shop/592/desc/paraavis-toy",
     source:"https://paraavis.com/paragliders/free-flying/toy/"
   };
+  demoWingSpecs["ParAAvis Tango"] = {
+    brand:"ParAAvis", klass:"Standart · учебное крыло", area:"19,01–36,00 м² (размеры 19–36)",
+    span:"9,66–13,29 м (зависит от размера)", aspect:"4,9", cells:"42",
+    load:"54–135 кг (в зависимости от размера)", weight:"Не указано в источнике",
+    speed:"24–50 км/ч (AFNOR)", glide:"Не указано",
+    flights:null, hours:null, year:null, condition:"Не указано", inspection:"Не указано",
+    imageSource:"https://www.paraavismoto.ru/paraplanyi/tango.html",
+    source:"https://www.paraavismoto.ru/paraplanyi/tango.html"
+  };
   var demoWingOwners = ["Ozone Buzz Z7","Advance Alpha 7","Skywalk Mescal 6","Gin Explorer 2","Nova Ion 6","BGD Epic 2","Ozone Rush 6","Advance Epsilon 9","Niviuk Hook 6","Skywalk Chili 5"];
   for (var wi = 0; wi < users.length; wi++) {
     users[wi].wing = demoWingOwners[wi % demoWingOwners.length];
   }
   // Реальное крыло Сергея по данным производителя ParAAvis.
   users[0].wing = "ParAAvis TT S";
-  users[0].wings = ["ParAAvis TT S", "ParAAvis Cab 42", "ParAAvis Toy M"];
+  users[0].wings = ["ParAAvis TT S", "ParAAvis Cab 42", "ParAAvis Toy M", "ParAAvis Tango"];
 
   var spotSectors = {
     "п. Куликово (Склон)": ["С", "СВ"],
