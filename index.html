@@ -110,6 +110,10 @@
   .weather-spot { gap:8px; }
   .weather-current { font-size:13px; color:#334155; }
   .weather-loading { color:#64748B; font-size:13px; padding:12px 0; }
+  .flight-weather { background:#F0F9FF; border:1px solid #BAE6FD; border-radius:9px; padding:9px 10px; display:flex; flex-direction:column; gap:5px; }
+  .flight-weather-title { font-size:12px; font-weight:800; color:#075985; }
+  .flight-weather-values { font-size:12px; line-height:1.6; color:#0F172A; }
+  .flight-weather-note { font-size:11px; color:#475569; }
   @media (max-width:360px) { .weather-grid { grid-template-columns:1fr; } }
 
   /* Формы и модалка */
@@ -490,6 +494,7 @@
   function renderHome() {
     var feat = document.getElementById("featured"); feat.innerHTML = "";
     if (flights.length) feat.appendChild(buildFlightCard(flights[0], true));
+    updateFeaturedFlightWeather();
 
     var list = document.getElementById("list"); list.innerHTML = "";
     for (var i = 0; i < flights.length; i++) {
@@ -972,6 +977,7 @@
   // Погода: актуальные данные Open-Meteo для каждого спота.
   var weatherLoaded = false;
   var weatherLoading = false;
+  var weatherDataBySpot = [];
   var weatherSpots = [
     { name: "п. Куликово", sector: ["С", "СВ"], lat: 54.96, lon: 20.35 },
     { name: "п. Донское", sector: ["СЗ", "З"], lat: 54.95, lon: 20.65 },
@@ -1045,6 +1051,67 @@
     return card;
   }
 
+  function parseFlightDate(f) {
+    var months = {"января":0,"февраля":1,"марта":2,"апреля":3,"мая":4,"июня":5,"июля":6,"августа":7,"сентября":8,"октября":9,"ноября":10,"декабря":11};
+    var m = String(f.date || "").toLowerCase().match(/(\\d{1,2})\\s+([а-яё]+)/i);
+    if (!m || months[m[2]] === undefined) return null;
+    var ym = String(f.month || "").match(/(20\\d{2})/);
+    var tm = String(f.time || "").match(/(\\d{1,2}):(\\d{2})/);
+    var d = new Date(ym ? Number(ym[1]) : new Date().getFullYear(), months[m[2]], Number(m[1]), tm ? Number(tm[1]) : 12, tm ? Number(tm[2]) : 0);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function updateFeaturedFlightWeather() {
+    var host = document.getElementById("featured");
+    var card = host && host.querySelector(".card");
+    if (!card) return;
+    var old = card.querySelector(".flight-weather");
+    if (old) old.remove();
+    var f = flights.length ? flights[0] : null;
+    if (!f || f.canceled) return;
+    var spot = weatherSpots.filter(function(x) { return f.spot.toLowerCase().indexOf(x.name.toLowerCase()) !== -1; })[0];
+    var idx = spot ? weatherSpots.indexOf(spot) : -1;
+    var data = idx >= 0 ? weatherDataBySpot[idx] : null;
+    var target = parseFlightDate(f);
+    var box = document.createElement("div");
+    box.className = "flight-weather";
+    var title = document.createElement("div");
+    title.className = "flight-weather-title";
+    title.textContent = "🌤 Погода на время полёта";
+    box.appendChild(title);
+    var values = document.createElement("div");
+    values.className = "flight-weather-values";
+    var note = document.createElement("div");
+    note.className = "flight-weather-note";
+    if (!data || !data.hourly || !target) {
+      values.textContent = weatherLoading ? "Загружаем прогноз…" : "Прогноз для даты и места полёта пока недоступен.";
+    } else {
+      var hourly = data.hourly, best = -1, bestDiff = Infinity;
+      for (var i = 0; i < (hourly.time || []).length; i++) {
+        var diff = Math.abs(new Date(hourly.time[i] + ":00").getTime() - target.getTime());
+        if (diff < bestDiff) { bestDiff = diff; best = i; }
+      }
+      if (best < 0 || bestDiff > 3 * 60 * 60 * 1000) {
+        values.textContent = "На выбранное время прогноз пока не предоставлен.";
+      } else {
+        var dir = windDirection(hourly.wind_direction_10m[best]);
+        var suitable = spot.sector.indexOf(dir) !== -1 || spot.name.indexOf("Аэродром") === 0 || spot.name.indexOf("Сокольники") === 0;
+        values.textContent = "🌡 " + weatherNumber(hourly.temperature_2m[best]) + " °C · 💨 " + dir + " " +
+          weatherNumber(hourly.wind_speed_10m[best]) + " м/с · порывы " + weatherNumber(hourly.wind_gusts_10m[best]) +
+          " м/с · ☔ " + weatherNumber(hourly.precipitation_probability[best]) + "% (" +
+          weatherNumber(hourly.precipitation[best]) + " мм) · ☁ " + weatherNumber(hourly.cloud_cover[best]) + "%";
+        note.textContent = (suitable ? "✓ Направление в рабочем секторе" : "⚠ Направление вне рабочего сектора") +
+          " · " + target.toLocaleString("ru-RU", {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+        note.className = "flight-weather-note " + (suitable ? "weather-good" : "weather-bad");
+      }
+    }
+    box.appendChild(values);
+    box.appendChild(note);
+    var badges = card.querySelector(".badges");
+    if (badges && badges.parentNode) badges.parentNode.insertBefore(box, badges.nextSibling);
+    else card.appendChild(box);
+  }
+
   async function loadWeather(force) {
     if (weatherLoading || (weatherLoaded && !force)) return;
     weatherLoading = true;
@@ -1060,13 +1127,16 @@
       var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat +
         "&longitude=" + lon +
         "&current=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation" +
+        "&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m" +
         "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant" +
-        "&forecast_days=3&wind_speed_unit=ms&timezone=Europe%2FKaliningrad";
+        "&forecast_days=16&wind_speed_unit=ms&timezone=Europe%2FKaliningrad";
       var response = await fetch(url);
       if (!response.ok) throw new Error("Сервис погоды ответил: " + response.status);
       var result = await response.json();
       var data = Array.isArray(result) ? result : [result];
       if (!data.length || !data[0].daily) throw new Error("Сервис не вернул прогноз");
+      weatherDataBySpot = data;
+      updateFeaturedFlightWeather();
       currentBox.innerHTML = "";
       var title = document.createElement("div");
       title.className = "title"; title.style.fontSize = "15px";
@@ -1110,6 +1180,7 @@
   }
 
   renderHome();
+  loadWeather(false);
   renderCalendar();
   renderPilots();
   renderProfile();
