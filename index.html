@@ -1179,7 +1179,10 @@
       weatherDataBySpot = data;
       var successful = data.filter(function(item) { return item && item.daily && item.hourly; });
       if (!successful.length) throw new Error("Не удалось получить прогноз ни для одного спота");
-      updateFeaturedFlightWeather();
+      // Перерисовываем главную карточку после получения данных: так погодный блок
+      // гарантированно добавляется в актуальную DOM-карточку, даже если экран
+      // был перестроен во время загрузки прогноза.
+      renderHome();
       currentBox.innerHTML = "";
       var title = document.createElement("div");
       title.className = "title"; title.style.fontSize = "15px";
