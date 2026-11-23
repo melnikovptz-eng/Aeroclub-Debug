@@ -90,7 +90,10 @@
 
   .ico-btn { text-decoration: none; font-size: 11px; font-weight: 700; padding: 4px 7px; border-radius: 7px; display: inline-flex; align-items: center; gap: 2px; }
   .ico-tel { background: #DCFCE7; color: #15803D; }
-  .ico-max { background: #F3E8FF; color: #6B21A8; }
+  .ico-max { width:30px; height:30px; padding:0; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#00BFFF 0%,#471AFF 55%,#9500FF 100%); box-shadow:0 2px 5px rgba(71,26,255,.22); transition:transform .15s ease,box-shadow .15s ease; }
+  .ico-max:hover { transform:translateY(-1px); box-shadow:0 4px 9px rgba(71,26,255,.3); }
+  .ico-max svg { display:block; width:21px; height:21px; }
+  .ico-max:focus-visible { outline:3px solid #00BFFF; outline-offset:2px; }
   .ico-tg  { background: #DBEAFE; color: #1D4ED8; }
 
   /* Погода */
@@ -385,7 +388,17 @@
     var box = document.createElement("div");
     box.className = "comm-icons";
     if (u.phone) { var a1 = document.createElement("a"); a1.className = "ico-btn ico-tel"; a1.href = "tel:" + u.phone; a1.textContent = "📞"; box.appendChild(a1); }
-    if (u.max) { var a2 = document.createElement("a"); a2.className = "ico-btn ico-max"; a2.href = "https://max.ru/" + u.max; a2.target = "_blank"; a2.rel = "noopener"; a2.textContent = "MAX"; box.appendChild(a2); }
+    if (u.max) {
+      var a2 = document.createElement("a");
+      a2.className = "ico-btn ico-max";
+      a2.href = "https://max.ru/" + encodeURIComponent(u.max);
+      a2.target = "_blank";
+      a2.rel = "noopener noreferrer";
+      a2.setAttribute("aria-label", "Написать в MAX");
+      a2.setAttribute("title", "Открыть MAX");
+      a2.innerHTML = '<svg viewBox="0 0 48 48" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M24 5.5c-10.2 0-18.5 7.4-18.5 16.6 0 5.1 2.6 9.7 6.8 12.8l-1.5 7.6 8.1-4.2c1.6.4 3.3.6 5.1.6 10.2 0 18.5-7.4 18.5-16.6S34.2 5.5 24 5.5Z"/><path fill="url(#maxMark)" d="M15 25.8 22.1 16l5.2 6.2 5.7-4.5-7.1 14.1-5.3-6.1-5.6 4.4Z"/><defs><linearGradient id="maxMark" x1="15" y1="16" x2="33" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#00BFFF"/><stop offset="1" stop-color="#9500FF"/></linearGradient></defs></svg>';
+      box.appendChild(a2);
+    }
     if (u.tg) { var a3 = document.createElement("a"); a3.className = "ico-btn ico-tg"; a3.href = "https://t.me/" + u.tg; a3.target = "_blank"; a3.rel = "noopener"; a3.textContent = "TG"; box.appendChild(a3); }
     return box;
   }
