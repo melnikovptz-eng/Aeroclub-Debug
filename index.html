@@ -319,12 +319,28 @@
     imageSource:"https://www.firstep.ru/shop/paraplans/paraplans.php",
     source:"https://www.paraavis.com/paragliders/free-flying/tt/"
   };
+  demoWingSpecs["ParAAvis Cab 42"] = {
+    brand:"ParAAvis", klass:"EN-B · коммерческий тандем", area:"42,2 м²", span:"15,4 м", aspect:"5,6",
+    cells:"47", load:"120–220 кг", weight:"8,1 кг", speed:"не указано", glide:"не указано",
+    flights:null, hours:null, year:null, condition:"Не указано", inspection:"Не указано",
+    imageSource:"https://www.paraavis.com/paragliders/free-flying/cab/",
+    source:"https://www.paraavis.com/paragliders/free-flying/cab/"
+  };
+  demoWingSpecs["ParAAvis Toy M"] = {
+    brand:"ParAAvis", klass:"EN-A · учебный", area:"27,1 м²", span:"10,6 м", aspect:"5,16",
+    cells:"36", load:"85–105 кг", weight:"4,54 кг", speed:"не указано", glide:"не указано",
+    flights:null, hours:null, year:null, condition:"Не указано", inspection:"Не указано",
+    image:"https://altair-aero.ru/_sh/5/592m_4.jpg",
+    imageSource:"https://altair-aero.ru/shop/592/desc/paraavis-toy",
+    source:"https://paraavis.com/paragliders/free-flying/toy/"
+  };
   var demoWingOwners = ["Ozone Buzz Z7","Advance Alpha 7","Skywalk Mescal 6","Gin Explorer 2","Nova Ion 6","BGD Epic 2","Ozone Rush 6","Advance Epsilon 9","Niviuk Hook 6","Skywalk Chili 5"];
   for (var wi = 0; wi < users.length; wi++) {
     users[wi].wing = demoWingOwners[wi % demoWingOwners.length];
   }
   // Реальное крыло Сергея по данным производителя ParAAvis.
   users[0].wing = "ParAAvis TT S";
+  users[0].wings = ["ParAAvis TT S", "ParAAvis Cab 42", "ParAAvis Toy M"];
 
   var spotSectors = {
     "п. Куликово (Склон)": ["С", "СВ"],
@@ -743,6 +759,10 @@
     document.getElementById("cal-add-btn").classList.toggle("hide", !isRP);
   }
 
+  function getPilotWings(u) {
+    return Array.isArray(u.wings) && u.wings.length ? u.wings : (u.wing && u.wing !== "—" ? [u.wing] : []);
+  }
+
   function renderPilots() {
     var box = document.getElementById("pilots-box"); box.innerHTML = "";
     for (var i = 0; i < users.length; i++) {
@@ -752,16 +772,20 @@
       left.appendChild(makeAvatar(u, true));
       var info = document.createElement("div");
       info.innerHTML = "<b>" + u.name + "</b><div class='sub'>" + u.role + (u.car ? " · 🚗 +" + u.seats : "") + "</div>";
+      var pilotWings = getPilotWings(u);
       var wingLine = document.createElement("div");
       wingLine.className = "sub wing-line";
-      wingLine.appendChild(document.createTextNode("Крыло: "));
-      if (u.wing && u.wing !== "—") {
-        var wingLink = document.createElement("button");
-        wingLink.type = "button";
-        wingLink.className = "wing-link";
-        wingLink.textContent = u.wing;
-        wingLink.onclick = (function(wing) { return function() { openWingDetails(wing); }; })(u.wing);
-        wingLine.appendChild(wingLink);
+      wingLine.appendChild(document.createTextNode(pilotWings.length > 1 ? "Крылья: " : "Крыло: "));
+      if (pilotWings.length) {
+        for (var wli = 0; wli < pilotWings.length; wli++) {
+          if (wli) wingLine.appendChild(document.createTextNode(" · "));
+          var wingLink = document.createElement("button");
+          wingLink.type = "button";
+          wingLink.className = "wing-link";
+          wingLink.textContent = pilotWings[wli];
+          wingLink.onclick = (function(wing) { return function() { openWingDetails(wing); }; })(pilotWings[wli]);
+          wingLine.appendChild(wingLink);
+        }
       } else {
         wingLine.appendChild(document.createTextNode("не указано"));
       }
@@ -790,11 +814,14 @@
     modal.appendChild(title);
     if (d.image) {
       var wingPhoto = document.createElement("img");
-      wingPhoto.src = d.image; wingPhoto.alt = "Параплан ParAAvis TT в полёте";
+      wingPhoto.src = d.image; wingPhoto.alt = "Параплан " + wing + " в полёте";
       wingPhoto.style.cssText = "display:block;width:100%;max-height:230px;object-fit:cover;border-radius:14px;margin:14px 0 8px;background:#eef2f7;";
       wingPhoto.loading = "lazy"; modal.appendChild(wingPhoto);
+    }
+    if (d.imageSource) {
       var photoLink = document.createElement("a"); photoLink.href = d.imageSource; photoLink.target = "_blank"; photoLink.rel = "noopener";
-      photoLink.textContent = "Фото ParAAvis TT · источник"; photoLink.style.cssText = "display:block;font-size:12px;margin:-2px 0 12px;color:var(--accent,#2563eb);";
+      photoLink.textContent = d.image ? "Фото крыла · источник" : "Фото и описание крыла на сайте производителя";
+      photoLink.style.cssText = "display:block;font-size:12px;margin:8px 0 12px;color:var(--accent,#2563eb);";
       modal.appendChild(photoLink);
     }
     var note = document.createElement("div");
