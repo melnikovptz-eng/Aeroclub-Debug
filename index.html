@@ -651,7 +651,7 @@
       left.appendChild(makeAvatar(u, true));
       var info = document.createElement("div");
       var badgeInit = u.id === f.initId ? " <span class='badge b-comp'>РП</span>" : "";
-      info.innerHTML = "<b>" + u.name + "</b>" + badgeInit + "<div class='sub'>" + u.role + " · " + u.wing + "</div>";
+      info.innerHTML = "<b>" + u.name + "</b>" + badgeInit + "<div class='sub'>" + u.role + "</div><div class='sub'>Крыло: " + u.wing + "</div>";
       var contacts = makeCommIcons(u);
       contacts.style.marginTop = "6px";
       info.appendChild(contacts);
@@ -807,9 +807,6 @@
       left.appendChild(makeAvatar(u, true));
       var info = document.createElement("div");
       info.innerHTML = "<b>" + u.name + "</b><div class='sub'>" + u.role + (u.car ? " · 🚗 +" + u.seats : "") + "</div>";
-      var contacts = makeCommIcons(u);
-      contacts.style.marginTop = "6px";
-      info.appendChild(contacts);
       var pilotWings = getPilotWings(u);
       var wingLine = document.createElement("div");
       wingLine.className = "sub wing-line";
@@ -828,6 +825,9 @@
         wingLine.appendChild(document.createTextNode("не указано"));
       }
       info.appendChild(wingLine);
+      var contacts = makeCommIcons(u);
+      contacts.style.marginTop = "6px";
+      info.appendChild(contacts);
       left.appendChild(info);
       row.appendChild(left);
       box.appendChild(row);
