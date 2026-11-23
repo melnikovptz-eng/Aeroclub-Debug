@@ -46,6 +46,11 @@
   .av-init { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #fff; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: -7px; }
   .av-init:first-child { margin-left: 0; }
   .av-lg { width: 32px; height: 32px; font-size: 14px; margin-left: 0; }
+  .featured-init { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:2px; }
+  .featured-rp { flex-shrink:0; }
+  .featured-init-info { display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0; }
+  .featured-init-name { font-size:12px; font-weight:700; color:#334155; }
+  .featured-contacts { display:flex; align-items:center; gap:6px; }
 
   /* Плашки групп */
   .groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -476,10 +481,36 @@
     c.appendChild(badges);
 
     var initU = getUser(f.initId);
-    var il = document.createElement("div"); il.className = "init-line";
-    il.appendChild(makeAvatar(initU, false));
-    var itxt = document.createElement("span"); itxt.textContent = "Инициатор (РП): " + initU.name;
-    il.appendChild(itxt);
+    var il = document.createElement("div");
+    il.className = isFeat ? "featured-init" : "init-line";
+    if (isFeat) {
+      var rpBadge = document.createElement("span");
+      rpBadge.className = "badge b-comp featured-rp";
+      rpBadge.textContent = "РП";
+      il.appendChild(rpBadge);
+
+      il.appendChild(makeAvatar(initU, true));
+      var initInfo = document.createElement("div");
+      initInfo.className = "featured-init-info";
+      var itxt = document.createElement("div");
+      itxt.className = "featured-init-name";
+      itxt.textContent = initU.name;
+      initInfo.appendChild(itxt);
+
+      var contacts = makeCommIcons(initU);
+      contacts.classList.add("featured-contacts");
+      var tel = contacts.querySelector(".ico-tel");
+      var tg = contacts.querySelector(".ico-tg");
+      var max = contacts.querySelector(".ico-max");
+      contacts.innerHTML = "";
+      [tel, tg, max].forEach(function(link) { if (link) contacts.appendChild(link); });
+      initInfo.appendChild(contacts);
+      il.appendChild(initInfo);
+    } else {
+      il.appendChild(makeAvatar(initU, false));
+      var itxt = document.createElement("span"); itxt.textContent = "Инициатор (РП): " + initU.name;
+      il.appendChild(itxt);
+    }
     c.appendChild(il);
 
     var gr = document.createElement("div"); gr.className = "groups";
